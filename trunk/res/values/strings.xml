@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello parkrio!</string>
     <string name="app_name">parkrio</string>
+    <string name="loginTitle">파크리오 원격검침 조회</string>
+    <string name="usernameLabel">Username :</string>
+    <string name="passwordLabel">Password :</string>
+    <string name="loginBtnText">Login</string>
+    <string name="exitBtnText">Exit</string>
+        
 </resources>
