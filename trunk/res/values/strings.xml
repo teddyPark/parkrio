@@ -4,6 +4,7 @@
     <string name="loginTitle">파크리오 원격검침 조회</string>
     <string name="usernameLabel">Username :</string>
     <string name="passwordLabel">Password :</string>
+    <string name="rememberidLabel">remember id/pwd</string>
     <string name="loginBtnText">Login</string>
     <string name="exitBtnText">Exit</string>
         

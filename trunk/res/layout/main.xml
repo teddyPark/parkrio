@@ -57,12 +57,21 @@
             android:layout_toRightOf="@id/passwordLabel"
             android:inputType="textPassword" />
 
+        <CheckBox
+            android:id="@+id/rememberChk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/passwordLabel"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp"
+            android:text="@string/rememberidLabel" />
+
         <Button
             android:id="@+id/loginBtn"
             android:layout_width="100sp"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@id/passwordLabel"
+            android:layout_below="@id/rememberChk"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="26dp"
             android:text="@string/loginBtnText" />
@@ -72,7 +81,7 @@
             android:layout_width="100sp"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_below="@id/passwordLabel"
+            android:layout_below="@id/rememberChk"
             android:layout_marginRight="20dp"
             android:layout_marginTop="26dp"
             android:text="@string/exitBtnText" />
