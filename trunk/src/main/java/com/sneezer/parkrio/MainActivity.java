@@ -1,16 +1,26 @@
 package com.sneezer.parkrio;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
+
 import org.springframework.web.client.RestTemplate;
 
-import android.app.Service;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -70,14 +80,11 @@ public class MainActivity extends AbstractAsyncActivity {
 				if (((CheckBox) findViewById(R.id.rememberChk)).isChecked()) {
 
 					SharedPreferences.Editor editor = preferences.edit();
-					editor.putString("username", inputUsername.getText()
-							.toString());
-					editor.putString("password", inputPassword.getText()
-							.toString());
+					editor.putString("username", inputUsername.getText().toString());
+					editor.putString("password", inputPassword.getText().toString());
 					editor.putBoolean("isRemember", rememberChk.isChecked());
 					editor.commit();
-					Toast.makeText(getApplicationContext(), "committed",
-							Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(), "committed",Toast.LENGTH_LONG).show();
 				}
 				// Toast.makeText(getApplicationContext(),
 				// "FetchSecuredResourceTask", Toast.LENGTH_LONG).show();
@@ -100,8 +107,7 @@ public class MainActivity extends AbstractAsyncActivity {
 		Toast.makeText(this, response.getText(), Toast.LENGTH_LONG).show();
 	}
 
-	private class FetchSecuredResourceTask extends
-			AsyncTask<Void, Void, Message> {
+	private class FetchSecuredResourceTask extends AsyncTask<Void, Void, Message> {
 		private String username;
 		private String password;
 
@@ -116,18 +122,43 @@ public class MainActivity extends AbstractAsyncActivity {
 
 			//Toast.makeText(getApplicationContext(),"id=" + this.username + "/pwd=" + this.password,Toast.LENGTH_LONG).show();
 
+			/*
 			RestTemplate restTemplate = new RestTemplate();
 			restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
 			//String response = restTemplate.getForObject(base_url, String.class,	"");
 			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.TEXT_HTML);
 			Map<String,String> reqParams = new HashMap<String, String>();
 			reqParams.put("uid",this.username);
 			reqParams.put("upwd", this.password);
 			
 			HttpEntity<Map> requestEntity = new HttpEntity<Map>(reqParams, headers);
-			HttpEntity<Map> httpEntity = restTemplate.exchange(base_url, HttpMethod.POST, requestEntity, Map.class,reqParams);
+			//HttpEntity<String> httpEntity = restTemplate.exchange(base_url, HttpMethod.POST, requestEntity, String.class);
+			HttpEntity<String> httpEntity = restTemplate.postForObject(base_url, requestEntity, HttpEntity.class);
 			HttpHeaders responseHeader = httpEntity.getHeaders();
-			List<String> cookies = headers.get("Set-Cookie");
+			
+			//http://cherrykyun.tistory.com/archive/201204?page=1
+			List<String> cookies = responseHeader.get("Set-Cookie");
+			*/
+			DefaultHttpClient httpclient = new DefaultHttpClient();
+			HttpPost httpost = new HttpPost(base_url);
+			List <NameValuePair> requestParams = new ArrayList<NameValuePair>();
+			requestParams.add(new BasicNameValuePair("uid",this.username));
+			requestParams.add(new BasicNameValuePair("upwd",this.password));
+			//httpost.setEntity(new UrlEncodedFormEntity(requestParams, "euc-kr"));
+			
+			HttpResponse response = null;
+			try {
+				response = httpclient.execute(httpost);
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			HttpEntity entity = response.getEntity();
+			List<Cookie> cookies = httpclient.getCookieStore().getCookies();
 			Toast.makeText(getApplicationContext(),	cookies.toString(), Toast.LENGTH_LONG).show();
 			
 		}
