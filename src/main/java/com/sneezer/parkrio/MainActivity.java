@@ -1,24 +1,23 @@
 package com.sneezer.parkrio;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.StringHttpMessageConverter;
 
+
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import android.content.SharedPreferences;
@@ -26,7 +25,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.View;
+import android.util.Log;
 import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -55,7 +56,7 @@ public class MainActivity extends AbstractAsyncActivity {
 
 		final SharedPreferences preferences = getSharedPreferences("USER_INFO",
 				MODE_PRIVATE);
-		final CookieManager cookieManager = CookieManager.getInstance();
+		
 
 		String username = preferences.getString("username", "");
 		String password = preferences.getString("password", "");
@@ -114,34 +115,16 @@ public class MainActivity extends AbstractAsyncActivity {
 		@Override
 		protected void onPreExecute() {
 			String base_url = getString(R.string.base_url);
+			final CookieManager cookieManager = CookieManager.getInstance();
+			CookieSyncManager.createInstance(getApplicationContext());
 
 			EditText editText = (EditText) findViewById(R.id.useridEntry);
 			this.username = editText.getText().toString();
 			editText = (EditText) findViewById(R.id.passwordEntry);
 			this.password = editText.getText().toString();
 
-			//Toast.makeText(getApplicationContext(),"id=" + this.username + "/pwd=" + this.password,Toast.LENGTH_LONG).show();
-
-			/*
-			RestTemplate restTemplate = new RestTemplate();
-			restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
-			//String response = restTemplate.getForObject(base_url, String.class,	"");
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.TEXT_HTML);
-			Map<String,String> reqParams = new HashMap<String, String>();
-			reqParams.put("uid",this.username);
-			reqParams.put("upwd", this.password);
-			
-			HttpEntity<Map> requestEntity = new HttpEntity<Map>(reqParams, headers);
-			//HttpEntity<String> httpEntity = restTemplate.exchange(base_url, HttpMethod.POST, requestEntity, String.class);
-			HttpEntity<String> httpEntity = restTemplate.postForObject(base_url, requestEntity, HttpEntity.class);
-			HttpHeaders responseHeader = httpEntity.getHeaders();
-			
-			//http://cherrykyun.tistory.com/archive/201204?page=1
-			List<String> cookies = responseHeader.get("Set-Cookie");
-			*/
 			DefaultHttpClient httpclient = new DefaultHttpClient();
-			HttpPost httpost = new HttpPost(base_url);
+			HttpPost httpost = new HttpPost(base_url+"index_iframe.aspx");
 			List <NameValuePair> requestParams = new ArrayList<NameValuePair>();
 			requestParams.add(new BasicNameValuePair("uid",this.username));
 			requestParams.add(new BasicNameValuePair("upwd",this.password));
@@ -157,10 +140,35 @@ public class MainActivity extends AbstractAsyncActivity {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			HttpEntity entity = response.getEntity();
-			List<Cookie> cookies = httpclient.getCookieStore().getCookies();
-			Toast.makeText(getApplicationContext(),	cookies.toString(), Toast.LENGTH_LONG).show();
-			
+			if ( response != null ) {
+				HttpEntity httpEntity = response.getEntity();
+				List<Cookie> cookies = httpclient.getCookieStore().getCookies();
+				for ( int i=0 ; i< cookies.size(); i++ ) {
+					
+					if (cookies.get(i).getName().equals("ASP.NET_SessionId")) {
+						String cookieString = cookies.get(i).getName()+"="+cookies.get(i).getValue() +"; path=" + cookies.get(i).getPath();
+						cookieManager.setCookie(base_url, cookieString);
+						CookieSyncManager.getInstance().sync();
+					}
+				}
+				
+				Toast.makeText(getApplicationContext(),	cookies.toString(), Toast.LENGTH_LONG).show();
+				Log.i(TAG, "Cookies: " + cookies.toString());
+	
+				StringBuilder html = new StringBuilder(); 
+		        try {
+		        	BufferedReader br = new BufferedReader(new InputStreamReader(httpEntity.getContent()));
+		        	while (true) {
+		        		String line = br.readLine();
+		        		if (line == null) break;
+		        		html.append(line + '\n');
+		        		Log.i(TAG, line);
+		        	}
+		        	br.close();
+		        } catch (Exception e) {
+		        	 
+		        }
+			}
 		}
 
 		@Override
