@@ -11,6 +11,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -54,9 +55,7 @@ public class MainActivity extends AbstractAsyncActivity {
 		// Log.i(TAG, "onCreate");
 		setContentView(R.layout.main);
 
-		final SharedPreferences preferences = getSharedPreferences("USER_INFO",
-				MODE_PRIVATE);
-		
+		final SharedPreferences preferences = getSharedPreferences("USER_INFO",	MODE_PRIVATE);
 
 		String username = preferences.getString("username", "");
 		String password = preferences.getString("password", "");
@@ -115,6 +114,8 @@ public class MainActivity extends AbstractAsyncActivity {
 		@Override
 		protected void onPreExecute() {
 			String base_url = getString(R.string.base_url);
+			boolean isLogon = false;
+			
 			final CookieManager cookieManager = CookieManager.getInstance();
 			CookieSyncManager.createInstance(getApplicationContext());
 
@@ -128,10 +129,11 @@ public class MainActivity extends AbstractAsyncActivity {
 			List <NameValuePair> requestParams = new ArrayList<NameValuePair>();
 			requestParams.add(new BasicNameValuePair("uid",this.username));
 			requestParams.add(new BasicNameValuePair("upwd",this.password));
-			//httpost.setEntity(new UrlEncodedFormEntity(requestParams, "euc-kr"));
 			
+		    
 			HttpResponse response = null;
 			try {
+				((HttpPost) httpost).setEntity(new UrlEncodedFormEntity(requestParams));
 				response = httpclient.execute(httpost);
 			} catch (ClientProtocolException e) {
 				// TODO Auto-generated catch block
@@ -142,20 +144,8 @@ public class MainActivity extends AbstractAsyncActivity {
 			}
 			if ( response != null ) {
 				HttpEntity httpEntity = response.getEntity();
-				List<Cookie> cookies = httpclient.getCookieStore().getCookies();
-				for ( int i=0 ; i< cookies.size(); i++ ) {
-					
-					if (cookies.get(i).getName().equals("ASP.NET_SessionId")) {
-						String cookieString = cookies.get(i).getName()+"="+cookies.get(i).getValue() +"; path=" + cookies.get(i).getPath();
-						cookieManager.setCookie(base_url, cookieString);
-						CookieSyncManager.getInstance().sync();
-					}
-				}
-				
-				Toast.makeText(getApplicationContext(),	cookies.toString(), Toast.LENGTH_LONG).show();
-				Log.i(TAG, "Cookies: " + cookies.toString());
 	
-				StringBuilder html = new StringBuilder(); 
+				StringBuilder html = new StringBuilder();
 		        try {
 		        	BufferedReader br = new BufferedReader(new InputStreamReader(httpEntity.getContent()));
 		        	while (true) {
@@ -168,7 +158,29 @@ public class MainActivity extends AbstractAsyncActivity {
 		        } catch (Exception e) {
 		        	 
 		        }
+
+		        if ( html.toString().indexOf("alert") == -1 ) {
+		        	isLogon = true;
+		        }
 			}
+			
+			// success login
+	        if (isLogon) {
+	        	// save cookie value
+	        	List<Cookie> cookies = httpclient.getCookieStore().getCookies();
+	        	Log.i(TAG, "Cookies: " + cookies.toString());
+
+	        	for ( int i=0 ; i< cookies.size(); i++ ) {
+					if (cookies.get(i).getName().equals("ASP.NET_SessionId")) {
+						String cookieString = cookies.get(i).getName()+"="+cookies.get(i).getValue() +"; path=" + cookies.get(i).getPath();
+						cookieManager.setCookie(base_url, cookieString);
+						CookieSyncManager.getInstance().sync();
+					}
+				}
+				Toast.makeText(getApplicationContext(), "로그인 성공", Toast.LENGTH_LONG).show();
+	        } else {
+	        	Toast.makeText(getApplicationContext(), "로그인 실패. ID/비밀번호를 확인하세요.", Toast.LENGTH_LONG).show();
+	        }
 		}
 
 		@Override
