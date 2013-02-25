@@ -17,10 +17,10 @@ import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
-
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -36,6 +36,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AbstractAsyncActivity {
+	private static final boolean DEBUG = true;
+
 	private static String TAG = "parkrio";
 
 	private EditText inputUsername;
@@ -55,6 +57,19 @@ public class MainActivity extends AbstractAsyncActivity {
 		// Log.i(TAG, "onCreate");
 		setContentView(R.layout.main);
 
+		if (DEBUG) {
+			String base_url = getString(R.string.base_url);
+			final CookieManager cookieManager = CookieManager.getInstance();
+			CookieSyncManager.createInstance(getApplicationContext());
+			
+			String cookieString = "ASP.NET_SessionId=asdasdfasdfasdfasdf; path=/";
+			cookieManager.setCookie(base_url, cookieString);
+			CookieSyncManager.getInstance().sync();
+			
+			Intent compareIntent = new Intent(getApplicationContext(), CompareActivity.class);
+			compareIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(compareIntent);
+		}
 		final SharedPreferences preferences = getSharedPreferences("USER_INFO",	MODE_PRIVATE);
 
 		String username = preferences.getString("username", "");
@@ -86,8 +101,6 @@ public class MainActivity extends AbstractAsyncActivity {
 					editor.commit();
 					Toast.makeText(getApplicationContext(), "committed",Toast.LENGTH_LONG).show();
 				}
-				// Toast.makeText(getApplicationContext(),
-				// "FetchSecuredResourceTask", Toast.LENGTH_LONG).show();
 				new FetchSecuredResourceTask().execute();
 
 			}
@@ -110,28 +123,46 @@ public class MainActivity extends AbstractAsyncActivity {
 	private class FetchSecuredResourceTask extends AsyncTask<Void, Void, Message> {
 		private String username;
 		private String password;
-
+		private boolean isLogon = false;
+		
 		@Override
 		protected void onPreExecute() {
+			showLoadingProgressDialog();
+			
+			// get username / password
+			EditText editText = (EditText) findViewById(R.id.useridEntry);
+			this.username = editText.getText().toString();
+			editText = (EditText) findViewById(R.id.passwordEntry);
+			this.password = editText.getText().toString();
+			
+			super.onPreExecute();
+		}
+
+		@Override
+		protected Message doInBackground(Void... arg0) {
+			// TODO Auto-generated method stub
 			String base_url = getString(R.string.base_url);
 			boolean isLogon = false;
+			HttpResponse response = null;
 			
 			final CookieManager cookieManager = CookieManager.getInstance();
 			CookieSyncManager.createInstance(getApplicationContext());
 
+			// get username / password
 			EditText editText = (EditText) findViewById(R.id.useridEntry);
 			this.username = editText.getText().toString();
 			editText = (EditText) findViewById(R.id.passwordEntry);
 			this.password = editText.getText().toString();
 
+			// set http client
 			DefaultHttpClient httpclient = new DefaultHttpClient();
 			HttpPost httpost = new HttpPost(base_url+"index_iframe.aspx");
+			
+			// set parameter
 			List <NameValuePair> requestParams = new ArrayList<NameValuePair>();
 			requestParams.add(new BasicNameValuePair("uid",this.username));
 			requestParams.add(new BasicNameValuePair("upwd",this.password));
 			
-		    
-			HttpResponse response = null;
 			try {
 				((HttpPost) httpost).setEntity(new UrlEncodedFormEntity(requestParams));
 				response = httpclient.execute(httpost);
@@ -144,7 +175,7 @@ public class MainActivity extends AbstractAsyncActivity {
 			}
 			if ( response != null ) {
 				HttpEntity httpEntity = response.getEntity();
-	
+
 				StringBuilder html = new StringBuilder();
 		        try {
 		        	BufferedReader br = new BufferedReader(new InputStreamReader(httpEntity.getContent()));
@@ -160,12 +191,12 @@ public class MainActivity extends AbstractAsyncActivity {
 		        }
 
 		        if ( html.toString().indexOf("alert") == -1 ) {
-		        	isLogon = true;
+		        	this.isLogon = true;
 		        }
 			}
 			
 			// success login
-	        if (isLogon) {
+	        if (this.isLogon) {
 	        	// save cookie value
 	        	List<Cookie> cookies = httpclient.getCookieStore().getCookies();
 	        	Log.i(TAG, "Cookies: " + cookies.toString());
@@ -177,22 +208,21 @@ public class MainActivity extends AbstractAsyncActivity {
 						CookieSyncManager.getInstance().sync();
 					}
 				}
-				Toast.makeText(getApplicationContext(), "로그인 성공", Toast.LENGTH_LONG).show();
-	        } else {
-	        	Toast.makeText(getApplicationContext(), "로그인 실패. ID/비밀번호를 확인하세요.", Toast.LENGTH_LONG).show();
-	        }
-		}
-
-		@Override
-		protected Message doInBackground(Void... arg0) {
-			// TODO Auto-generated method stub
-			return null;
+	        }			
+	        return null;
 		}
 
 		@Override
 		protected void onPostExecute(Message result) {
-			// dismissProgressDialog();
-			// displayResponse(result);
+			dismissProgressDialog();
+			
+			if ( isLogon ) {
+				Intent compareIntent = new Intent(getApplicationContext(), CompareActivity.class);
+				compareIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(compareIntent);
+			} else {
+				Toast.makeText(getApplicationContext(), "로그인 실패. ID/비밀번호를 확인하세요.", Toast.LENGTH_LONG).show();
+			}
 
 		}
 
