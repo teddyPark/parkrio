@@ -14,5 +14,7 @@
     <string name="title_section1">일별</string>
     <string name="title_section2">월별</string>
     <string name="title_section3">연별</string>
+    <string name="title_activity_compare">CompareActivity</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>

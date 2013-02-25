@@ -26,6 +26,11 @@
         	<version>1.0.1.RELEASE</version>
         	<scope>compile</scope>
         </dependency>
+        <dependency>
+        	<groupId>net.htmlparser.jericho</groupId>
+        	<artifactId>jericho-html</artifactId>
+        	<version>3.3</version>
+        </dependency>
     </dependencies>
 
     <build>
