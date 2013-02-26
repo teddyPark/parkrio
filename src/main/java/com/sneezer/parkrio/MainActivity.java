@@ -2,7 +2,6 @@ package com.sneezer.parkrio;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +15,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-
-import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -36,7 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AbstractAsyncActivity {
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	private static String TAG = "parkrio";
 
@@ -99,7 +95,6 @@ public class MainActivity extends AbstractAsyncActivity {
 					editor.putString("password", inputPassword.getText().toString());
 					editor.putBoolean("isRemember", rememberChk.isChecked());
 					editor.commit();
-					Toast.makeText(getApplicationContext(), "committed",Toast.LENGTH_LONG).show();
 				}
 				new FetchSecuredResourceTask().execute();
 
