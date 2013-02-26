@@ -213,12 +213,12 @@ public class MainActivity extends AbstractAsyncActivity {
 			
 			if ( isLogon ) {
 				Intent compareIntent = new Intent(getApplicationContext(), CompareActivity.class);
-				compareIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(compareIntent);
+				finish();
 			} else {
 				Toast.makeText(getApplicationContext(), "로그인 실패. ID/비밀번호를 확인하세요.", Toast.LENGTH_LONG).show();
 			}
-
+			
 		}
 
 	}

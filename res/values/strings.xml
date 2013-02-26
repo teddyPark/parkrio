@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">parkrio</string>
+    <string name="app_name">파크리오 원격검침</string>
     <string name="base_url">http://211.49.175.211/</string>
-    <string name="loginTitle">원격검침 조회</string>
+    <string name="loginPageTitle">잠실 파크리오 아파트
+원격검침</string>
     <string name="usernameLabel">Username :</string>
     <string name="passwordLabel">Password :</string>
     <string name="rememberidLabel">ID/비밀번호 기억하기</string>
@@ -14,7 +15,7 @@
     <string name="title_section1">일별</string>
     <string name="title_section2">월별</string>
     <string name="title_section3">연별</string>
-    <string name="title_activity_compare">CompareActivity</string>
+    <string name="title_activity_compare">당일 사용량</string>
     <string name="hello_world">Hello world!</string>
     <string name="titleElect">전기</string>
     <string name="titleHotwater">온수</string>

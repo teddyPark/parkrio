@@ -33,7 +33,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:text="금일"
+                android:text="오늘"
                 android:gravity="center"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
             
@@ -51,7 +51,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:text="전월"
+                android:text="이번달"
                 android:gravity="center"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -60,7 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:text="전년"
+                android:text="지난달"
                 android:gravity="center"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -97,7 +97,7 @@
                 android:text="" />
 
             <TextView
-                android:id="@+id/lastmonthElect"
+                android:id="@+id/thismonthElect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
@@ -105,7 +105,7 @@
                 android:text="" />
 
             <TextView
-                android:id="@+id/lastyearElect"
+                android:id="@+id/lastmonthElect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
@@ -145,7 +145,7 @@
                 android:text="" />
 
             <TextView
-                android:id="@+id/lastmonthHeat"
+                android:id="@+id/thismonthHeat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
@@ -153,7 +153,7 @@
                 android:text="" />
 
             <TextView
-                android:id="@+id/lastyearHeat"
+                android:id="@+id/lastmonthHeat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
@@ -193,7 +193,7 @@
                 android:text="" />
 
             <TextView
-                android:id="@+id/lastmonthHotwater"
+                android:id="@+id/thismonthHotwater"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
@@ -201,7 +201,7 @@
                 android:text="" />
 
             <TextView
-                android:id="@+id/lastyearHotwater"
+                android:id="@+id/lastmonthHotwater"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
@@ -241,7 +241,7 @@
                 android:text="" />
 
             <TextView
-                android:id="@+id/lastmonthGas"
+                android:id="@+id/thismonthGas"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
@@ -249,7 +249,7 @@
                 android:text="" />
 
             <TextView
-                android:id="@+id/lastyearGas"
+                android:id="@+id/lastmonthGas"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
@@ -289,7 +289,7 @@
                 android:text="" />
 
             <TextView
-                android:id="@+id/lastmonthWater"
+                android:id="@+id/thismonthWater"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
@@ -297,7 +297,7 @@
                 android:text="" />
 
             <TextView
-                android:id="@+id/lastyearWater"
+                android:id="@+id/lastmonthWater"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"

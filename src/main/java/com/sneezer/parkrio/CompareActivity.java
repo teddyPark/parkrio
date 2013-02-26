@@ -94,7 +94,8 @@ public class CompareActivity extends AbstractAsyncActivity {
 			try {
 				for (String type : typeList) {				
 					int resId = res.getIdentifier("com.sneezer.parkrio:id/"+columnId+type, null, null);
-					((TextView) findViewById(resId)).setText(Float.toString(mesu.get(type)));
+					String valueStr = String.format("%.2f",mesu.get(type));
+					((TextView) findViewById(resId)).setText(valueStr);
 				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -126,7 +127,7 @@ public class CompareActivity extends AbstractAsyncActivity {
 				
 				GregorianCalendar gc = new GregorianCalendar();
 				
-				
+				// 금일 검침
 				Date today = new java.util.Date();
 				String dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
 				String postParams = "__VIEWSTATE="+URLEncoder.encode("/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=","EUC-KR") + "&txtFDate=" + dateString;
@@ -134,11 +135,26 @@ public class CompareActivity extends AbstractAsyncActivity {
 		
 			    Date yesterday = new Date(new java.util.Date().getTime()-(long)86400*1000);
 			    
-				dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date().getTime()-(long)86400*1000);
+			    // 전일 검침
+				dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(today.getTime()-(long)86400*1000);
 				Log.i("date",dateString);
 				postParams = "__VIEWSTATE="+URLEncoder.encode("/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=","EUC-KR") + "&txtFDate=" + dateString;
 				Log.i("params",postParams);
 				htmls.put("yesterday", HttpClientForParkrio.fetch(url, cookieManager.getCookie(base_url), postParams));
+
+				// 금월 1일
+				dateString = new java.text.SimpleDateFormat("yyyy-MM-01").format(today.getTime());
+				Log.i("date",dateString);
+				postParams = "__VIEWSTATE="+URLEncoder.encode("/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=","EUC-KR") + "&txtFDate=" + dateString;
+				Log.i("params",postParams);
+				htmls.put("thismonth_firstday", HttpClientForParkrio.fetch(url, cookieManager.getCookie(base_url), postParams));
+
+				// 전월 1일
+				dateString = new java.text.SimpleDateFormat("yyyy-MM-01").format(today.getTime()-(long)86400*30*1000);
+				Log.i("date",dateString);
+				postParams = "__VIEWSTATE="+URLEncoder.encode("/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=","EUC-KR") + "&txtFDate=" + dateString;
+				Log.i("params",postParams);
+				htmls.put("lastmonth_firstday", HttpClientForParkrio.fetch(url, cookieManager.getCookie(base_url), postParams));
 
 				
 			} catch (Exception e) {
@@ -151,15 +167,29 @@ public class CompareActivity extends AbstractAsyncActivity {
 		protected void onPostExecute(String html) {
 			dismissProgressDialog();
 			Measurement todayMeasument = new Measurement();			
-			Map <String,Measurement> getData = new HashMap();
-			try {
-				getData = parseDayValuePage(htmls.get("today"));
-				SetText("today", getData.get("today"));
-				Log.i("htmls",this.htmls.get("yesterday"));
-				getData = parseDayValuePage(htmls.get("yesterday"));
-				
-				SetText("yesterday", getData.get("today"));
 
+			try {
+				// 금일 검침 setText
+				Map <String,Measurement> getData1 = parseDayValuePage(htmls.get("today"));
+				SetText("today", getData1.get("today"));
+				
+				// 전일 검침 setText
+				Map <String,Measurement> getData2 = parseDayValuePage(htmls.get("yesterday"));
+				SetText("yesterday", getData2.get("today"));
+				
+				// 이번달 검침 setText
+				Map <String,Measurement> getData3 = parseDayValuePage(htmls.get("thismonth_firstday"));
+				Log.i("today",getData3.get("current").toString());
+				Log.i("firstday",getData1.get("current").toString());
+				SetText("thismonth", getData1.get("current").compare(getData3.get("current")));
+
+				// 지난달 검침 setText
+				Map <String,Measurement> getData4 = parseDayValuePage(htmls.get("lastmonth_firstday"));
+				Log.i("today",getData4.get("current").toString());
+				Log.i("firstday",getData3.get("current").toString());
+				SetText("lastmonth", getData3.get("current").compare(getData4.get("current")));
+
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}			
@@ -167,6 +197,7 @@ public class CompareActivity extends AbstractAsyncActivity {
 		}
 		
 	}
+
 	private Map<String,Measurement> parseDayValuePage(String dayValue) throws Exception {
 		Measurement currentMeasurement = new Measurement();
 		Measurement todayMeasurement = new Measurement();

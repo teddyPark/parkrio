@@ -12,8 +12,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="@string/loginTitle"
-        android:textColor="#ffffff00"
+        android:gravity="center"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:text="@string/loginPageTitle"
+        android:textColor="#ffffffFF"
         android:textSize="24sp" />
 
     <RelativeLayout
