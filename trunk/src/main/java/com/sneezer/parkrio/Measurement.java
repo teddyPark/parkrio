@@ -53,4 +53,16 @@ public class Measurement {
 		
 		return resultMap;
 	}
+	
+	public Measurement compare(Measurement smallMeasure) {
+		Measurement resultMeasure = new Measurement();
+		
+		resultMeasure.setElect(elect - smallMeasure.getElect());
+		resultMeasure.setHotwater(hotwater - smallMeasure.getHotwater());
+		resultMeasure.setHeat(heat - smallMeasure.getHeat());
+		resultMeasure.setWater(water - smallMeasure.getWater());
+		resultMeasure.setGas(gas - smallMeasure.getGas());
+		
+		return resultMeasure;
+	}
 }

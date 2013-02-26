@@ -49,7 +49,7 @@ public class HttpClientForParkrio {
 				if (line == null)
 					break;
 				html.append(line + '\n');
-				Log.i("readHTML", line);
+				//Log.i("readHTML", line);
 			}
 			br.close();
 			httpClient.disconnect();
