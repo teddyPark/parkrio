@@ -16,5 +16,11 @@
     <string name="title_section3">연별</string>
     <string name="title_activity_compare">CompareActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="titleElect">전기</string>
+    <string name="titleHotwater">온수</string>
+    <string name="titleHeat">난방</string>
+    <string name="titleGas">가스</string>
+    <string name="titleWater">수도</string>
+    
 
 </resources>

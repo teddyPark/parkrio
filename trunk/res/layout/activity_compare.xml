@@ -10,7 +10,9 @@
 
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"  >
+        android:layout_height="wrap_content"
+        android:background="@drawable/com_round_corner"  
+        android:stretchColumns="*" >
 
         <TableRow
             android:id="@+id/tableRow1"
@@ -21,186 +23,332 @@
                 android:id="@+id/textView1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
                 android:text="항목"
+                android:gravity="center"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <TextView
                 android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="금월"
+                android:padding="5dp"
+                android:text="금일"
+                android:gravity="center"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
-
+            
             <TextView
                 android:id="@+id/textView3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="전월"
+                android:padding="5dp"
+                android:text="어제"
+                android:gravity="center"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <TextView
                 android:id="@+id/textView4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="전월"
+                android:gravity="center"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
                 android:text="전년"
+                android:gravity="center"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
         </TableRow>
-
+		<View android:layout_height="2dip" android:background="#ff909090"/>
         <TableRow
             android:id="@+id/rowElect"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" 
+            android:background="#000">
 
             <TextView
                 android:id="@+id/elect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="전기" />
+                android:padding="5dp"
+                android:gravity="center"
+                android:text="@string/titleElect"/>"
 
             <TextView
-                android:id="@+id/thismonthElect"
+                android:id="@+id/todayElect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
+                android:text="" />
+            
+            <TextView
+                android:id="@+id/yesterdayElect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
             <TextView
                 android:id="@+id/lastmonthElect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
             <TextView
                 android:id="@+id/lastyearElect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
         </TableRow>
-
+		<View android:layout_height="2dip" android:background="#ff909090"/>
         <TableRow
             android:id="@+id/rowHeat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" 
+            android:background="#000">
 
             <TextView
                 android:id="@+id/heat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="난방" />
+                android:padding="5dp"
+                android:gravity="center"
+                android:text="@string/titleHeat" />
 
             <TextView
-                android:id="@+id/thismonthHeat"
+                android:id="@+id/todayHeat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
+                android:text="" />
+            
+            <TextView
+                android:id="@+id/yesterdayHeat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
             <TextView
                 android:id="@+id/lastmonthHeat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
             <TextView
                 android:id="@+id/lastyearHeat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
         </TableRow>
-
+		<View android:layout_height="2dip" android:background="#ff909090"/>
         <TableRow
             android:id="@+id/rowHotwater"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" 
+            android:background="#000">
 
             <TextView
                 android:id="@+id/hotwater"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="온수" />
+                android:padding="5dp"
+                android:gravity="center"
+                android:text="@string/titleHotwater" />
 
             <TextView
-                android:id="@+id/thismonthHotwater"
+                android:id="@+id/todayHotwater"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
+                android:text="" />
+            
+            <TextView
+                android:id="@+id/yesterdayHotwater"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
             <TextView
                 android:id="@+id/lastmonthHotwater"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
             <TextView
                 android:id="@+id/lastyearHotwater"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
         </TableRow>
-
+		<View android:layout_height="2dip" android:background="#ff909090"/>
         <TableRow
             android:id="@+id/rowGas"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" 
+            android:background="#000" >
 
             <TextView
                 android:id="@+id/gas"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="가스" />
+                android:padding="5dp"
+                android:gravity="center"
+                android:text="@string/titleGas" />
 
             <TextView
-                android:id="@+id/thismonthGas"
+                android:id="@+id/todayGas"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
+                android:text="" />
+            
+            <TextView
+                android:id="@+id/yesterdayGas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
             <TextView
                 android:id="@+id/lastmonthGas"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
             <TextView
                 android:id="@+id/lastyearGas"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
         </TableRow>
-
+		<View android:layout_height="2dip" android:background="#ff909090"/>
         <TableRow
             android:id="@+id/rowWater"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" 
+            android:background="#000">
 
             <TextView
                 android:id="@+id/water"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="수도" />
+                android:padding="5dp"
+                android:gravity="center"
+                android:text="@string/titleWater" />
 
             <TextView
-                android:id="@+id/thismonthWater"
+                android:id="@+id/todayWater"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
+                android:text="" />
+            
+            <TextView
+                android:id="@+id/yesterdayWater"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
             <TextView
                 android:id="@+id/lastmonthWater"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
             <TextView
                 android:id="@+id/lastyearWater"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
                 android:text="" />
 
         </TableRow>
+        <TableRow
+            android:id="@+id/tableRow1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+           <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+            
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </TableRow>        
 
     </TableLayout>
 
