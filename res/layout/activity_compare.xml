@@ -70,15 +70,18 @@
             android:id="@+id/rowElect"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" 
-            android:background="#000">
+            android:background="#000"
+            android:paddingTop="5dp" 
+            android:paddingBottom="5dp" >
 
             <TextView
                 android:id="@+id/elect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="5dp"
                 android:gravity="center"
-                android:text="@string/titleElect"/>"
+                android:padding="5dp"
+                android:text="@string/titleElect"
+                android:textSize="@dimen/type_text_size" />
 
             <TextView
                 android:id="@+id/todayElect"
@@ -118,7 +121,9 @@
             android:id="@+id/rowHeat"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" 
-            android:background="#000">
+            android:background="#000"
+            android:paddingTop="5dp" 
+            android:paddingBottom="5dp" >
 
             <TextView
                 android:id="@+id/heat"
@@ -126,7 +131,8 @@
                 android:layout_height="wrap_content"
                 android:padding="5dp"
                 android:gravity="center"
-                android:text="@string/titleHeat" />
+                android:text="@string/titleHeat"
+                android:textSize="@dimen/type_text_size" />
 
             <TextView
                 android:id="@+id/todayHeat"
@@ -166,7 +172,9 @@
             android:id="@+id/rowHotwater"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" 
-            android:background="#000">
+            android:background="#000"
+            android:paddingTop="5dp" 
+            android:paddingBottom="5dp">
 
             <TextView
                 android:id="@+id/hotwater"
@@ -174,7 +182,8 @@
                 android:layout_height="wrap_content"
                 android:padding="5dp"
                 android:gravity="center"
-                android:text="@string/titleHotwater" />
+                android:text="@string/titleHotwater"
+                android:textSize="@dimen/type_text_size" />
 
             <TextView
                 android:id="@+id/todayHotwater"
@@ -214,7 +223,9 @@
             android:id="@+id/rowGas"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" 
-            android:background="#000" >
+            android:background="#000"
+            android:paddingTop="5dp" 
+            android:paddingBottom="5dp" >
 
             <TextView
                 android:id="@+id/gas"
@@ -222,7 +233,8 @@
                 android:layout_height="wrap_content"
                 android:padding="5dp"
                 android:gravity="center"
-                android:text="@string/titleGas" />
+                android:text="@string/titleGas"
+                android:textSize="@dimen/type_text_size" />
 
             <TextView
                 android:id="@+id/todayGas"
@@ -262,7 +274,9 @@
             android:id="@+id/rowWater"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" 
-            android:background="#000">
+            android:background="#000"
+            android:paddingTop="5dp" 
+            android:paddingBottom="5dp">
 
             <TextView
                 android:id="@+id/water"
@@ -270,7 +284,8 @@
                 android:layout_height="wrap_content"
                 android:padding="5dp"
                 android:gravity="center"
-                android:text="@string/titleWater" />
+                android:text="@string/titleWater"
+                android:textSize="@dimen/type_text_size" />
 
             <TextView
                 android:id="@+id/todayWater"
