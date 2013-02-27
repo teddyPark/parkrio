@@ -68,7 +68,17 @@
             android:layout_marginLeft="20dp"
             android:layout_marginTop="20dp"
             android:text="@string/rememberidLabel" />
-
+        
+		<CheckBox
+            android:id="@+id/autologinChk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/passwordLabel"
+            android:layout_toRightOf="@id/rememberChk"
+            android:layout_marginLeft="40dp"
+            android:layout_marginTop="20dp"
+            android:text="@string/autologinLabel" />
+		
         <Button
             android:id="@+id/loginBtn"
             android:layout_width="100sp"

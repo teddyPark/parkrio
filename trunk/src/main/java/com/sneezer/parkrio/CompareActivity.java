@@ -1,17 +1,8 @@
 package com.sneezer.parkrio;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -19,34 +10,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.http.impl.cookie.BrowserCompatSpec;
-import org.apache.http.impl.cookie.CookieSpecBase;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.params.*;
-
-
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.view.Menu;
+import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.widget.TextView;
@@ -57,18 +29,61 @@ import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
 
 public class CompareActivity extends AbstractAsyncActivity {
-	private static String TAG = "parkrio_compare";
-	private final String uri = "iframe_DayValue.aspx";
-	private CookieManager cookieManager;
+	private static String TAG = "compareActivity";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_compare);
 		
-		
 		String todayString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
 		new FetchDailyDataTask().execute(todayString);
+		
+		findViewById(R.id.elect).setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity.class);
+				chartIntent.putExtra("type", "elect");
+				startActivity(chartIntent);
+			}
+		});
+
+		findViewById(R.id.heat).setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity.class);
+				chartIntent.putExtra("type", "heat");
+				startActivity(chartIntent);
+			}
+		});
+
+		findViewById(R.id.hotwater).setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity.class);
+				chartIntent.putExtra("type", "hotwater");
+				startActivity(chartIntent);
+			}
+		});
+
+		findViewById(R.id.gas).setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity.class);
+				chartIntent.putExtra("type", "gas");
+				startActivity(chartIntent);
+			}
+		});
+
+		findViewById(R.id.water).setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity.class);
+				chartIntent.putExtra("type", "water");
+				startActivity(chartIntent);
+			}
+		});
+		
 		
 		/*
 		String dayValue = readAsset(this, uri);
@@ -84,7 +99,7 @@ public class CompareActivity extends AbstractAsyncActivity {
 		*/
 	}
 
-	private void SetText (String columnId, Measurement mesurement) {
+	private void setMeasurementText (String columnId, Measurement mesurement) {
 		Class<R.id> Ids = R.id.class;
 		Resources res = getResources();
 		String[] typeList = new String[] {"Elect", "Gas", "Hotwater", "Water", "Heat"};
@@ -106,7 +121,8 @@ public class CompareActivity extends AbstractAsyncActivity {
 	
 	private class FetchDailyDataTask extends AsyncTask<String, Void, String> {
 		Map <String, String> htmls = new HashMap<String, String>();
-		
+		private final String viewstateParam = "/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=";
+		private final String serverCharset = "EUC-KR";
 			
 		@Override
 		protected void onPreExecute() {
@@ -125,37 +141,32 @@ public class CompareActivity extends AbstractAsyncActivity {
 			try { 
 				URL url = new URL(getString(R.string.base_url)+"hwork/iframe_DayValue.aspx");
 				
-				GregorianCalendar gc = new GregorianCalendar();
-				
-				// 금일 검침
+				// 금일 검침 데이터 가져오기
 				Date today = new java.util.Date();
 				String dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
-				String postParams = "__VIEWSTATE="+URLEncoder.encode("/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=","EUC-KR") + "&txtFDate=" + dateString;
+				String postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + "&txtFDate=" + dateString;
 				htmls.put("today", HttpClientForParkrio.fetch(url, cookieManager.getCookie(base_url), postParams));
-		
-			    Date yesterday = new Date(new java.util.Date().getTime()-(long)86400*1000);
-			    
-			    // 전일 검침
+	
+			    // 전일 검침 데이터 가져오기
 				dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(today.getTime()-(long)86400*1000);
 				Log.i("date",dateString);
-				postParams = "__VIEWSTATE="+URLEncoder.encode("/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=","EUC-KR") + "&txtFDate=" + dateString;
+				postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + "&txtFDate=" + dateString;
 				Log.i("params",postParams);
 				htmls.put("yesterday", HttpClientForParkrio.fetch(url, cookieManager.getCookie(base_url), postParams));
 
-				// 금월 1일
+				// 금월 1일 데이터 가져오기
 				dateString = new java.text.SimpleDateFormat("yyyy-MM-01").format(today.getTime());
 				Log.i("date",dateString);
-				postParams = "__VIEWSTATE="+URLEncoder.encode("/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=","EUC-KR") + "&txtFDate=" + dateString;
+				postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + "&txtFDate=" + dateString;
 				Log.i("params",postParams);
 				htmls.put("thismonth_firstday", HttpClientForParkrio.fetch(url, cookieManager.getCookie(base_url), postParams));
 
-				// 전월 1일
+				// 전월 1일 데이터 가져오기
 				dateString = new java.text.SimpleDateFormat("yyyy-MM-01").format(today.getTime()-(long)86400*30*1000);
 				Log.i("date",dateString);
-				postParams = "__VIEWSTATE="+URLEncoder.encode("/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=","EUC-KR") + "&txtFDate=" + dateString;
+				postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + "&txtFDate=" + dateString;
 				Log.i("params",postParams);
 				htmls.put("lastmonth_firstday", HttpClientForParkrio.fetch(url, cookieManager.getCookie(base_url), postParams));
-
 				
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -166,29 +177,27 @@ public class CompareActivity extends AbstractAsyncActivity {
 		@Override
 		protected void onPostExecute(String html) {
 			dismissProgressDialog();
-			Measurement todayMeasument = new Measurement();			
 
 			try {
 				// 금일 검침 setText
 				Map <String,Measurement> getData1 = parseDayValuePage(htmls.get("today"));
-				SetText("today", getData1.get("today"));
+				setMeasurementText("today", getData1.get("today"));
 				
 				// 전일 검침 setText
 				Map <String,Measurement> getData2 = parseDayValuePage(htmls.get("yesterday"));
-				SetText("yesterday", getData2.get("today"));
+				setMeasurementText("yesterday", getData2.get("today"));
 				
 				// 이번달 검침 setText
 				Map <String,Measurement> getData3 = parseDayValuePage(htmls.get("thismonth_firstday"));
 				Log.i("today",getData3.get("current").toString());
 				Log.i("firstday",getData1.get("current").toString());
-				SetText("thismonth", getData1.get("current").compare(getData3.get("current")));
+				setMeasurementText("thismonth", getData1.get("current").compare(getData3.get("current")));
 
 				// 지난달 검침 setText
 				Map <String,Measurement> getData4 = parseDayValuePage(htmls.get("lastmonth_firstday"));
 				Log.i("today",getData4.get("current").toString());
 				Log.i("firstday",getData3.get("current").toString());
-				SetText("lastmonth", getData3.get("current").compare(getData4.get("current")));
-
+				setMeasurementText("lastmonth", getData3.get("current").compare(getData4.get("current")));
 				
 			} catch (Exception e) {
 				e.printStackTrace();
