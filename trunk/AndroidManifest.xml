@@ -15,6 +15,11 @@
         android:icon="@drawable/icon"
         android:label="@string/app_name" >
         <activity android:name="com.sneezer.parkrio.MainActivity" >
+            <intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />                
+            </intent-filter>
         </activity>
         <activity
             android:name="com.sneezer.parkrio.CompareActivity"
@@ -23,11 +28,6 @@
         <activity
             android:name="com.sneezer.parkrio.ChartActivity"
             android:label="@string/title_activity_chart" >
-            <intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />                
-            </intent-filter>
         </activity>
         </application>
 

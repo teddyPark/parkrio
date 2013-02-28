@@ -30,20 +30,31 @@ import net.htmlparser.jericho.Source;
 
 public class CompareActivity extends AbstractAsyncActivity {
 	private static String TAG = "compareActivity";
+	private CookieManager cookieManager;
+	private String base_url;
+	private String cookieString;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_compare);
+		this.base_url = getString(R.string.base_url);
 		
-		String todayString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+		CookieSyncManager.createInstance(this);
+		CookieManager cookieManager = CookieManager.getInstance();
+		CookieSyncManager.getInstance().startSync();
+		this.cookieString = cookieManager.getCookie(base_url);
+		Log.i("oncreate",cookieManager.getCookie(base_url));
+		
+		final String todayString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
 		new FetchDailyDataTask().execute(todayString);
 		
 		findViewById(R.id.elect).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity.class);
-				chartIntent.putExtra("type", "elect");
+				chartIntent.putExtra("type", "elec");
+				chartIntent.putExtra("date",todayString);
 				startActivity(chartIntent);
 			}
 		});
@@ -52,7 +63,8 @@ public class CompareActivity extends AbstractAsyncActivity {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity.class);
-				chartIntent.putExtra("type", "heat");
+				chartIntent.putExtra("kind", "heat");
+				chartIntent.putExtra("date",todayString);
 				startActivity(chartIntent);
 			}
 		});
@@ -61,7 +73,8 @@ public class CompareActivity extends AbstractAsyncActivity {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity.class);
-				chartIntent.putExtra("type", "hotwater");
+				chartIntent.putExtra("kind", "hotwater");
+				chartIntent.putExtra("date",todayString);
 				startActivity(chartIntent);
 			}
 		});
@@ -70,7 +83,8 @@ public class CompareActivity extends AbstractAsyncActivity {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity.class);
-				chartIntent.putExtra("type", "gas");
+				chartIntent.putExtra("kind", "gas");
+				chartIntent.putExtra("date",todayString);
 				startActivity(chartIntent);
 			}
 		});
@@ -79,7 +93,8 @@ public class CompareActivity extends AbstractAsyncActivity {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity.class);
-				chartIntent.putExtra("type", "water");
+				chartIntent.putExtra("kind", "water");
+				chartIntent.putExtra("date",todayString);
 				startActivity(chartIntent);
 			}
 		});
@@ -98,7 +113,18 @@ public class CompareActivity extends AbstractAsyncActivity {
 		SetText("today", todayMeasument);
 		*/
 	}
-
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		CookieSyncManager.getInstance().startSync();
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		CookieSyncManager.getInstance().stopSync();
+	}
 	private void setMeasurementText (String columnId, Measurement mesurement) {
 		Class<R.id> Ids = R.id.class;
 		Resources res = getResources();
@@ -133,40 +159,37 @@ public class CompareActivity extends AbstractAsyncActivity {
 		@Override
 		protected String doInBackground(String... params) {
 			// TODO Auto-generated method stub
-			String base_url = getString(R.string.base_url);
 			String html = new String();
-			
-			CookieSyncManager.createInstance(getApplicationContext());
-			CookieManager cookieManager = CookieManager.getInstance();
+
 			try { 
-				URL url = new URL(getString(R.string.base_url)+"hwork/iframe_DayValue.aspx");
+				URL url = new URL(base_url+"hwork/iframe_DayValue.aspx");
 				
 				// 금일 검침 데이터 가져오기
 				Date today = new java.util.Date();
 				String dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
 				String postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + "&txtFDate=" + dateString;
-				htmls.put("today", HttpClientForParkrio.fetch(url, cookieManager.getCookie(base_url), postParams));
+				htmls.put("today", HttpClientForParkrio.fetch(url, cookieString, postParams));
 	
 			    // 전일 검침 데이터 가져오기
 				dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(today.getTime()-(long)86400*1000);
 				Log.i("date",dateString);
 				postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + "&txtFDate=" + dateString;
 				Log.i("params",postParams);
-				htmls.put("yesterday", HttpClientForParkrio.fetch(url, cookieManager.getCookie(base_url), postParams));
+				htmls.put("yesterday", HttpClientForParkrio.fetch(url, cookieString, postParams));
 
 				// 금월 1일 데이터 가져오기
 				dateString = new java.text.SimpleDateFormat("yyyy-MM-01").format(today.getTime());
 				Log.i("date",dateString);
 				postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + "&txtFDate=" + dateString;
 				Log.i("params",postParams);
-				htmls.put("thismonth_firstday", HttpClientForParkrio.fetch(url, cookieManager.getCookie(base_url), postParams));
+				htmls.put("thismonth_firstday", HttpClientForParkrio.fetch(url, cookieString, postParams));
 
 				// 전월 1일 데이터 가져오기
 				dateString = new java.text.SimpleDateFormat("yyyy-MM-01").format(today.getTime()-(long)86400*30*1000);
 				Log.i("date",dateString);
 				postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + "&txtFDate=" + dateString;
 				Log.i("params",postParams);
-				htmls.put("lastmonth_firstday", HttpClientForParkrio.fetch(url, cookieManager.getCookie(base_url), postParams));
+				htmls.put("lastmonth_firstday", HttpClientForParkrio.fetch(url, cookieString, postParams));
 				
 			} catch (Exception e) {
 				e.printStackTrace();

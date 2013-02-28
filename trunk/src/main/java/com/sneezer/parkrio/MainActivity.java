@@ -36,7 +36,9 @@ public class MainActivity extends AbstractAsyncActivity {
 
 	private static String TAG = "parkrio";
 	private SharedPreferences preferences;
-
+	private CookieManager cookieManager;
+	private String base_url;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
@@ -48,11 +50,14 @@ public class MainActivity extends AbstractAsyncActivity {
 		super.onCreate(savedInstanceState);
 		// Log.i(TAG, "onCreate");
 		setContentView(R.layout.main);
+		this.base_url = getString(R.string.base_url);
+
+		cookieManager = CookieManager.getInstance();
+		CookieSyncManager.createInstance(getApplicationContext());
+		CookieSyncManager.getInstance().startSync();
 
 		if (DEBUG) {
 			String base_url = getString(R.string.base_url);
-			final CookieManager cookieManager = CookieManager.getInstance();
-			CookieSyncManager.createInstance(getApplicationContext());
 			
 			String cookieString = "ASP.NET_SessionId=asdasdfasdfasdfasdf; path=/";
 			cookieManager.setCookie(base_url, cookieString);
@@ -128,6 +133,17 @@ public class MainActivity extends AbstractAsyncActivity {
 		});
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		CookieSyncManager.getInstance().startSync();
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		CookieSyncManager.getInstance().stopSync();
+	}
 	private class FetchSecuredResourceTask extends AsyncTask<Void, Void, Message> {
 		private String username;
 		private String password;
@@ -149,12 +165,8 @@ public class MainActivity extends AbstractAsyncActivity {
 		@Override
 		protected Message doInBackground(Void... arg0) {
 			// TODO Auto-generated method stub
-			String base_url = getString(R.string.base_url);
 			boolean isLogon = false;
 			HttpResponse response = null;
-			
-			final CookieManager cookieManager = CookieManager.getInstance();
-			CookieSyncManager.createInstance(getApplicationContext());
 
 			// get username / password
 			EditText editText = (EditText) findViewById(R.id.useridEntry);
