@@ -134,6 +134,11 @@ public class MainActivity extends AbstractAsyncActivity {
 	}
 
 	@Override
+	public void showLoadingProgressDialog() {
+		this.showProgressDialog("로그인 중. 잠시만 기다려주세요...");
+	}
+	
+	@Override
 	protected void onResume() {
 		super.onResume();
 		CookieSyncManager.getInstance().startSync();
@@ -238,6 +243,8 @@ public class MainActivity extends AbstractAsyncActivity {
 			
 			if ( isLogon ) {
 				Intent compareIntent = new Intent(getApplicationContext(), CompareActivity.class);
+				String todayString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+				compareIntent.putExtra("date",todayString);
 				startActivity(compareIntent);
 				finish();
 			} else {

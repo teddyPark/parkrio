@@ -1,6 +1,7 @@
 package com.sneezer.parkrio;
 
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,18 +25,24 @@ import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.SimpleSeriesRenderer;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 
-
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Paint.Align;
+import android.view.GestureDetector;
 import android.view.Menu;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
+import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.util.Log;
@@ -52,6 +60,11 @@ public class ChartActivity extends AbstractAsyncActivity {
 	private final String serverCharset = "EUC-KR";
 	private String base_url = "";
 	private final String uri = "hwork/iframe_MonthGraph.aspx";
+	private final String uri2 = "hwork/iframe_MonthGraph2.aspx";
+
+	private static String intentKindParam;
+	private static String intentDateParam;
+	private TextView currentDateView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,8 +77,6 @@ public class ChartActivity extends AbstractAsyncActivity {
 		this.cookieString = cookieManager.getCookie(base_url);
 		
 		Calendar calendar = Calendar.getInstance();
-		String intentKindParam = new String();
-		String intentDateParam = new String();
 		
 		if ( getIntent().getStringExtra("kind") != null ) {
 			intentKindParam = getIntent().getStringExtra("kind");
@@ -77,11 +88,69 @@ public class ChartActivity extends AbstractAsyncActivity {
 		} else {
 			intentDateParam = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
 		}
+		
+		String[] dateArray = intentDateParam.split("-");
+		
+		currentDateView = (TextView) findViewById(R.id.currentDateEntry);
+		currentDateView.setText(dateArray[0]+"-"+dateArray[1]);
+		currentDateView.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				try {
+					String[] dateArray = intentDateParam.split("-");
+					DatePickerDialog datePickerDialog = new DatePickerDialog(this, dateSetListener, Integer.parseInt(dateArray[0]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[2]));
+					
+					Field[] f = datePickerDialog.getClass().getDeclaredFields();
+					for (Field dateField : f) {
+						if(dateField.getName().equals("mDatePicker")) {
+							dateField.setAccessible(true);
+							DatePicker datePicker = (DatePicker)dateField.get(datePickerDialog);
+							Field datePickerFields[] = dateField.getType().getDeclaredFields();
+							
+							for(Field datePickerField : datePickerFields) {
+								if("mDayPicker".equals(datePickerField.getName())) {
+									datePickerField.setAccessible(true);
+									Object dayPicker = new Object();
+									dayPicker = datePickerField.get(datePicker);
+									((View)dayPicker).setVisibility(View.GONE);
+								}
+							}
+						}
+					}
+					
+					datePickerDialog.show();
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}				
+				
+			}
+		});
 
+		findViewById(R.id.prevYearBtn).setOnClickListener(new View.OnClickListener() {
+			public void onClick(View arg0) {
+				
+			}
+		});
+
+		findViewById(R.id.prevMonthBtn).setOnClickListener(new View.OnClickListener() {
+			public void onClick(View arg0) {
+			}
+		});
 		new FetchDailyDataTask().execute(intentKindParam,intentDateParam);
 		
 	}
-
+	
+	private DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
+		@Override
+		public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+			// TODO Auto-generated method stub
+			String selDate = String.format("%4d-%2d-%2d",year,monthOfYear,dayOfMonth);  
+			Log.i("ondatesetlistener",selDate);
+			currentDateView.setText(String.format("%4d-%2d",year,monthOfYear));
+		}
+	};
+	
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -94,8 +163,13 @@ public class ChartActivity extends AbstractAsyncActivity {
 		CookieSyncManager.getInstance().stopSync();
 	}
 	
+	@Override
+	protected void onSaveInstanceState(Bundle outstate) {
+		outstate.putString("kind",intentKindParam);
+		outstate.putString("date",intentDateParam);
+	}
+
 	private class FetchDailyDataTask extends AsyncTask<String, Void, String> {
-		Map <String, String> htmls = new HashMap<String, String>();
 		Map <String,Object> resultMap = new HashMap<String,Object>();
 			
 		@Override
@@ -119,8 +193,20 @@ public class ChartActivity extends AbstractAsyncActivity {
 
 				resultMap.put("kind",params[0]);
 				resultMap.put("date",params[1]);
-				Log.i("cookie",cookieString);
-				resultMap.put("html", HttpClientForParkrio.fetch(url, cookieString, postParams));
+				if ( cookieString != null ) {
+					Log.i("cookie",cookieString);
+					resultMap.put("html", HttpClientForParkrio.fetch(url, cookieString, postParams));
+					postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + 
+							"&selYear=" + (Integer.parseInt(dateStrArray[0])-1) + "&selMonth=" + Integer.parseInt(dateStrArray[1]) + 
+									"&sKind="+params[0].toUpperCase();
+					resultMap.put("lastyear", HttpClientForParkrio.fetch(url, cookieString, postParams));
+
+				} else {
+					// if no-cookie then debug mode
+					resultMap.put("html", readAsset(getApplicationContext(),uri));
+					resultMap.put("lastyear", readAsset(getApplicationContext(),uri2));
+				}
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -134,14 +220,18 @@ public class ChartActivity extends AbstractAsyncActivity {
 			try {
 				List<Double> parseValue = parseMonthlyValuePage(resultMap.get("html").toString());
 				
-				setChart(parseValue,resultMap.get("kind").toString(),resultMap.get("date").toString());
+				// bar chart
+				setBarChart(parseValue,resultMap.get("kind").toString(),resultMap.get("date").toString());
+				
+				// line chart
+				//setLineChart(parseValue,resultMap.get("kind").toString(),resultMap.get("date").toString());
 				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}			
 			super.onPostExecute(html);
 		}
-		
+	}
 		private Map<String,Object> getKindInfo (String kind) {
 			Map<String,Object> result = new HashMap<String,Object>();
 			if ( kind.equals("elec") ) {
@@ -173,12 +263,13 @@ public class ChartActivity extends AbstractAsyncActivity {
 			return result;
 		}
 		
-		private void setChart(List<Double> parseValue,String kind, String dateString) {
+		private void setBarChart(List<Double> parseValue,String kind, String dateString) {
 			XYMultipleSeriesRenderer renderer = new XYMultipleSeriesRenderer();
 			
 			Map kindInfo = getKindInfo(kind);
+			String[] dateStringParse = dateString.split("-");
 			
-			renderer.setChartTitle(kindInfo.get("title").toString());
+			renderer.setChartTitle(Integer.parseInt(dateStringParse[1]) + "월 " + kindInfo.get("title").toString());
 			renderer.setChartTitleTextSize(20);
 			
 			String[] titles = new String[] {kindInfo.get("name").toString()};
@@ -195,10 +286,10 @@ public class ChartActivity extends AbstractAsyncActivity {
 			
 			renderer.setXTitle("날짜");
 			renderer.setYTitle(kindInfo.get("unit").toString());
-			renderer.setAxisTitleTextSize(12);
+			renderer.setAxisTitleTextSize(20);
 			renderer.setBarSpacing(0.1);
 			
-			renderer.setLabelsTextSize(10);
+			renderer.setLabelsTextSize(12);
 			renderer.setXAxisMin(0.5);
 			renderer.setXAxisMax(parseValue.size()+1);
 			renderer.setYAxisMin(0);
@@ -244,15 +335,14 @@ public class ChartActivity extends AbstractAsyncActivity {
 			r.setGradientStop(maxValue*0.8, (Integer) kindInfo.get("barColor"));
 			
 			// 그래프 객체 생성
-			GraphicalView gv = ChartFactory.getBarChartView(getApplicationContext(), dataset,
-					renderer, Type.STACKED);
-
+			GraphicalView gv = ChartFactory.getBarChartView(getApplicationContext(), dataset, renderer, Type.STACKED);
 			// 그래프를 LinearLayout에 추가
 			LinearLayout llBody = (LinearLayout) findViewById(R.id.chart_area);
 			llBody.addView(gv);
 		}
-		
-	}
+
+
+
 
 	private List<Double> parseMonthlyValuePage(String dayValue) throws Exception {
 		List<Double> resultSet = new ArrayList<Double>();
