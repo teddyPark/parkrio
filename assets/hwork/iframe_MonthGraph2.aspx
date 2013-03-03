@@ -162,7 +162,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								<!-- 일 그래프 시작 heigh=400 이 만땅 ------------------>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="292.810448879536" border="0" onmouseover="onLayer('11.20')" cellpadding="0" cellspacing="0">
+									<table width="12" height="292.810448879536" border="0" onmouseover="onLayer('9.20')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -170,7 +170,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="253.594763093901" border="0" onmouseover="onLayer('9.70')" cellpadding="0" cellspacing="0">
+									<table width="12" height="253.594763093901" border="0" onmouseover="onLayer('7.70')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -178,7 +178,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="318.954239403292" border="0" onmouseover="onLayer('12.20')" cellpadding="0" cellspacing="0">
+									<table width="12" height="318.954239403292" border="0" onmouseover="onLayer('10.20')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -186,7 +186,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="287.581695761317" border="0" onmouseover="onLayer('11.00')" cellpadding="0" cellspacing="0">
+									<table width="12" height="287.581695761317" border="0" onmouseover="onLayer('10.00')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -194,7 +194,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="316.339875310513" border="0" onmouseover="onLayer('12.10')" cellpadding="0" cellspacing="0">
+									<table width="12" height="316.339875310513" border="0" onmouseover="onLayer('9.10')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -202,7 +202,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="313.725486285073" border="0" onmouseover="onLayer('12.00')" cellpadding="0" cellspacing="0">
+									<table width="12" height="313.725486285073" border="0" onmouseover="onLayer('10.00')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -210,7 +210,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="277.124189524879" border="0" onmouseover="onLayer('10.60')" cellpadding="0" cellspacing="0">
+									<table width="12" height="277.124189524879" border="0" onmouseover="onLayer('7.60')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -218,7 +218,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="326.797381546951" border="0" onmouseover="onLayer('12.50')" cellpadding="0" cellspacing="0">
+									<table width="12" height="326.797381546951" border="0" onmouseover="onLayer('8.50')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -226,7 +226,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="400" border="0" onmouseover="onLayer('15.30')" cellpadding="0" cellspacing="0">
+									<table width="12" height="400" border="0" onmouseover="onLayer('12.30')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -234,7 +234,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="300.653591023195" border="0" onmouseover="onLayer('11.50')" cellpadding="0" cellspacing="0">
+									<table width="12" height="300.653591023195" border="0" onmouseover="onLayer('8.50')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -242,7 +242,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="311.111097259632" border="0" onmouseover="onLayer('11.90')" cellpadding="0" cellspacing="0">
+									<table width="12" height="311.111097259632" border="0" onmouseover="onLayer('9.90')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -250,7 +250,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="303.267980048635" border="0" onmouseover="onLayer('11.60')" cellpadding="0" cellspacing="0">
+									<table width="12" height="303.267980048635" border="0" onmouseover="onLayer('9.60')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -258,7 +258,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="284.967306735876" border="0" onmouseover="onLayer('10.90')" cellpadding="0" cellspacing="0">
+									<table width="12" height="284.967306735876" border="0" onmouseover="onLayer('8.90')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -266,7 +266,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="256.209152119342" border="0" onmouseover="onLayer('9.80')" cellpadding="0" cellspacing="0">
+									<table width="12" height="256.209152119342" border="0" onmouseover="onLayer('7.80')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -274,7 +274,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="287.581695761317" border="0" onmouseover="onLayer('11.00')" cellpadding="0" cellspacing="0">
+									<table width="12" height="287.581695761317" border="0" onmouseover="onLayer('13.00')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -282,7 +282,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="284.967306735876" border="0" onmouseover="onLayer('10.90')" cellpadding="0" cellspacing="0">
+									<table width="12" height="284.967306735876" border="0" onmouseover="onLayer('12.90')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -290,7 +290,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="316.339875310513" border="0" onmouseover="onLayer('12.10')" cellpadding="0" cellspacing="0">
+									<table width="12" height="316.339875310513" border="0" onmouseover="onLayer('9.10')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -298,7 +298,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="316.339875310513" border="0" onmouseover="onLayer('12.10')" cellpadding="0" cellspacing="0">
+									<table width="12" height="316.339875310513" border="0" onmouseover="onLayer('10.10')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -306,7 +306,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="303.267980048635" border="0" onmouseover="onLayer('11.60')" cellpadding="0" cellspacing="0">
+									<table width="12" height="303.267980048635" border="0" onmouseover="onLayer('15.60')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -314,7 +314,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="292.810448879536" border="0" onmouseover="onLayer('11.20')" cellpadding="0" cellspacing="0">
+									<table width="12" height="292.810448879536" border="0" onmouseover="onLayer('10.20')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -322,7 +322,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="298.039201997754" border="0" onmouseover="onLayer('11.40')" cellpadding="0" cellspacing="0">
+									<table width="12" height="298.039201997754" border="0" onmouseover="onLayer('18.40')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -330,23 +330,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="282.352942643098" border="0" onmouseover="onLayer('10.80')" cellpadding="0" cellspacing="0">
-										<tr>
-											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
-										</tr>
-									</table>
-								</td>
-								
-								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="303.267980048635" border="0" onmouseover="onLayer('11.60')" cellpadding="0" cellspacing="0">
-										<tr>
-											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
-										</tr>
-									</table>
-								</td>
-								
-								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="300.653591023195" border="0" onmouseover="onLayer('11.50')" cellpadding="0" cellspacing="0">
+									<table width="12" height="282.352942643098" border="0" onmouseover="onLayer('11.80')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -362,7 +346,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="250.980399001123" border="0" onmouseover="onLayer('9.60')" cellpadding="0" cellspacing="0">
+									<table width="12" height="300.653591023195" border="0" onmouseover="onLayer('14.50')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -370,7 +354,7 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="115.032680797793" border="0" onmouseover="onLayer('4.40')" cellpadding="0" cellspacing="0">
+									<table width="12" height="303.267980048635" border="0" onmouseover="onLayer('10.60')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>
@@ -378,7 +362,47 @@ __VIEWSTATE=%2FwEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4%3D&selYear=201
 								</td>
 								
 								<td width="14" height="40" align="center" valign="bottom">
-									<table width="12" height="0" border="0" onmouseover="onLayer('0.00')" cellpadding="0" cellspacing="0">
+									<table width="12" height="250.980399001123" border="0" onmouseover="onLayer('7.60')" cellpadding="0" cellspacing="0">
+										<tr>
+											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
+										</tr>
+									</table>
+								</td>
+								
+								<td width="14" height="40" align="center" valign="bottom">
+									<table width="12" height="115.032680797793" border="0" onmouseover="onLayer('3.40')" cellpadding="0" cellspacing="0">
+										<tr>
+											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
+										</tr>
+									</table>
+								</td>
+								
+								<td width="14" height="40" align="center" valign="bottom">
+									<table width="12" height="0" border="0" onmouseover="onLayer('10.00')" cellpadding="0" cellspacing="0">
+										<tr>
+											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
+										</tr>
+									</table>
+								</td>
+
+								<td width="14" height="40" align="center" valign="bottom">
+									<table width="12" height="0" border="0" onmouseover="onLayer('10.00')" cellpadding="0" cellspacing="0">
+										<tr>
+											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
+										</tr>
+									</table>
+								</td>
+
+								<td width="14" height="40" align="center" valign="bottom">
+									<table width="12" height="0" border="0" onmouseover="onLayer('10.00')" cellpadding="0" cellspacing="0">
+										<tr>
+											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
+										</tr>
+									</table>
+								</td>
+
+								<td width="14" height="40" align="center" valign="bottom">
+									<table width="12" height="0" border="0" onmouseover="onLayer('10.00')" cellpadding="0" cellspacing="0">
 										<tr>
 											<td background="../images/homenetwork/graph_bar_ELEC.gif"></td>
 										</tr>

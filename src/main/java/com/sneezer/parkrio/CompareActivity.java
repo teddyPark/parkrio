@@ -45,10 +45,17 @@ public class CompareActivity extends AbstractAsyncActivity {
 		CookieSyncManager.getInstance().startSync();
 		this.cookieString = cookieManager.getCookie(base_url);
 		Log.i("oncreate",cookieManager.getCookie(base_url));
+
+		String intentDateParam = new String();
+		if ( getIntent().getStringExtra("date") != null ) {
+			intentDateParam = getIntent().getStringExtra("date");
+		} else {
+			intentDateParam = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+		}
+		
+		new FetchDailyDataTask().execute(intentDateParam);
 		
 		final String todayString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
-		new FetchDailyDataTask().execute(todayString);
-		
 		findViewById(R.id.elect).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
@@ -99,19 +106,6 @@ public class CompareActivity extends AbstractAsyncActivity {
 			}
 		});
 		
-		
-		/*
-		String dayValue = readAsset(this, uri);
-		Map <String,Measurement> getData = new HashMap();
-		try {
-			getData = parseDayValuePage(dayValue);
-			todayMeasument = getData.get("today");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		Log.i(TAG,todayMeasument.toString());
-		SetText("today", todayMeasument);
-		*/
 	}
 	
 	@Override
@@ -125,6 +119,7 @@ public class CompareActivity extends AbstractAsyncActivity {
 		super.onPause();
 		CookieSyncManager.getInstance().stopSync();
 	}
+	
 	private void setMeasurementText (String columnId, Measurement mesurement) {
 		Class<R.id> Ids = R.id.class;
 		Resources res = getResources();
@@ -164,9 +159,12 @@ public class CompareActivity extends AbstractAsyncActivity {
 			try { 
 				URL url = new URL(base_url+"hwork/iframe_DayValue.aspx");
 				
+				java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd");
+				java.util.Date today = format.parse(params[0]);
+				
 				// 금일 검침 데이터 가져오기
-				Date today = new java.util.Date();
-				String dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+				//Date today = new java.util.Date();
+				String dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(today);
 				String postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + "&txtFDate=" + dateString;
 				htmls.put("today", HttpClientForParkrio.fetch(url, cookieString, postParams));
 	
