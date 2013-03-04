@@ -30,13 +30,14 @@ public final class R {
         public static final int icon_backup=0x7f020004;
     }
     public static final class id {
+        public static final int AppDescription=0x7f070036;
         public static final int RelativeLayout1=0x7f07002b;
-        public static final int action_settings=0x7f070035;
-        public static final int autologinChk=0x7f070032;
+        public static final int action_settings=0x7f070037;
+        public static final int autologinChk=0x7f070033;
         public static final int chart_area=0x7f070000;
         public static final int currentDateEntry=0x7f070003;
         public static final int elect=0x7f07000d;
-        public static final int exitBtn=0x7f070034;
+        public static final int exitBtn=0x7f070035;
         public static final int gas=0x7f07001f;
         public static final int heat=0x7f070013;
         public static final int hotwater=0x7f070019;
@@ -45,15 +46,16 @@ public final class R {
         public static final int lastmonthHeat=0x7f070017;
         public static final int lastmonthHotwater=0x7f07001d;
         public static final int lastmonthWater=0x7f070029;
-        public static final int loginBtn=0x7f070033;
+        public static final int loginBtn=0x7f070034;
         public static final int loginTitleLabel=0x7f07002c;
         public static final int nextMonthBtn=0x7f070004;
         public static final int nextYearBtn=0x7f070005;
-        public static final int passwordEntry=0x7f070030;
-        public static final int passwordLabel=0x7f07002f;
+        public static final int passwordEntry=0x7f070031;
+        public static final int passwordLabel=0x7f070030;
         public static final int prevMonthBtn=0x7f070002;
         public static final int prevYearBtn=0x7f070001;
-        public static final int rememberChk=0x7f070031;
+        public static final int relativeLayout2=0x7f07002d;
+        public static final int rememberChk=0x7f070032;
         public static final int rowElect=0x7f07000c;
         public static final int rowGas=0x7f07001e;
         public static final int rowHeat=0x7f070012;
@@ -76,8 +78,8 @@ public final class R {
         public static final int todayHeat=0x7f070014;
         public static final int todayHotwater=0x7f07001a;
         public static final int todayWater=0x7f070026;
-        public static final int useridEntry=0x7f07002e;
-        public static final int useridLabel=0x7f07002d;
+        public static final int useridEntry=0x7f07002f;
+        public static final int useridLabel=0x7f07002e;
         public static final int water=0x7f070025;
         public static final int yesterdayElect=0x7f07000f;
         public static final int yesterdayGas=0x7f070021;

@@ -29,6 +29,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -66,6 +68,12 @@ public class ChartActivity extends AbstractAsyncActivity {
 	private static String intentDateParam;
 	private TextView currentDateView;
 	
+	private int mYear;
+    private int mMonth;
+    private int mDay;
+	static final int DATE_DIALOG_ID = 0;
+	private DatePickerDialog datePickerDialog;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -89,18 +97,31 @@ public class ChartActivity extends AbstractAsyncActivity {
 			intentDateParam = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
 		}
 		
-		String[] dateArray = intentDateParam.split("-");
+		if ( savedInstanceState == null ) {
+			String[] dateArray = intentDateParam.split("-");
+			mYear=Integer.parseInt(dateArray[0]);
+			mMonth=Integer.parseInt(dateArray[1]);
+			mDay=1;
+		} else {
+			mYear=savedInstanceState.getInt("mYear");
+			mMonth=savedInstanceState.getInt("mMonth");
+			mDay=savedInstanceState.getInt("mDay");
+		}
 		
 		currentDateView = (TextView) findViewById(R.id.currentDateEntry);
-		currentDateView.setText(dateArray[0]+"-"+dateArray[1]);
+		currentDateView.setText(mYear+"-"+mMonth);
+		
 		currentDateView.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
 				try {
 					String[] dateArray = intentDateParam.split("-");
-					DatePickerDialog datePickerDialog = new DatePickerDialog(this, dateSetListener, Integer.parseInt(dateArray[0]), Integer.parseInt(dateArray[1]), Integer.parseInt(dateArray[2]));
+					
+					Log.i("setOnClickListener","called");
+					datePickerDialog = new DatePickerDialog(ChartActivity.this, dateSetListener, mYear, mMonth-1, 1);
 					
 					Field[] f = datePickerDialog.getClass().getDeclaredFields();
+					
 					for (Field dateField : f) {
 						if(dateField.getName().equals("mDatePicker")) {
 							dateField.setAccessible(true);
@@ -108,7 +129,7 @@ public class ChartActivity extends AbstractAsyncActivity {
 							Field datePickerFields[] = dateField.getType().getDeclaredFields();
 							
 							for(Field datePickerField : datePickerFields) {
-								if("mDayPicker".equals(datePickerField.getName())) {
+								if("mDaySpinner".equals(datePickerField.getName()) || "mDayPicker".equals(datePickerField.getName())) {
 									datePickerField.setAccessible(true);
 									Object dayPicker = new Object();
 									dayPicker = datePickerField.get(datePicker);
@@ -117,7 +138,6 @@ public class ChartActivity extends AbstractAsyncActivity {
 							}
 						}
 					}
-					
 					datePickerDialog.show();
 					
 				} catch (Exception e) {
@@ -125,40 +145,110 @@ public class ChartActivity extends AbstractAsyncActivity {
 				}				
 				
 			}
+
 		});
 
+		
 		findViewById(R.id.prevYearBtn).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View arg0) {
-				
+				calDate(-12);
+				updateDateDisplay();				
 			}
 		});
 
 		findViewById(R.id.prevMonthBtn).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View arg0) {
+				calDate(-1);
+				updateDateDisplay();				
 			}
 		});
+
+		findViewById(R.id.nextMonthBtn).setOnClickListener(new View.OnClickListener() {
+			public void onClick(View arg0) {
+				calDate(1);
+				updateDateDisplay();				
+			}
+		});
+
+		findViewById(R.id.nextYearBtn).setOnClickListener(new View.OnClickListener() {
+			public void onClick(View arg0) {
+				calDate(12);
+				updateDateDisplay();				
+			}
+		});
+		
 		new FetchDailyDataTask().execute(intentKindParam,intentDateParam);
+	}
+	
+	public void calDate (int termMonth) {
+		java.util.Date date = new java.util.Date();
+		try {
+			java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd");
+			date = format.parse(String.format("%4d-%2d-%2d",mYear,mMonth,mDay));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		c.add(c.MONTH,termMonth);
+
+		mYear=c.get(Calendar.YEAR);
+		mMonth=c.get(Calendar.MONTH)+1;
+		mDay=c.get(Calendar.DATE);
+
+		String selDate = String.format("%4d-%2d-%2d",mYear,mMonth,mDay);  
+		Log.i("onDateSetListener",selDate);
 		
 	}
 	
+	@Override
+	public void onNewIntent(Intent newIntent) {
+		Intent receivedIntent = getIntent();
+		Log.i("onNewIntent",Integer.toString(receivedIntent.getIntExtra("mMonth", 3)));
+		new FetchDailyDataTask().execute(intentKindParam,intentDateParam);
+		super.onNewIntent(newIntent);
+		//setIntent(newIntent);
+	}
+
 	private DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
+		
 		@Override
 		public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-			// TODO Auto-generated method stub
-			String selDate = String.format("%4d-%2d-%2d",year,monthOfYear,dayOfMonth);  
-			Log.i("ondatesetlistener",selDate);
-			currentDateView.setText(String.format("%4d-%2d",year,monthOfYear));
+
+			if ( year != mYear || monthOfYear+1 != mMonth || dayOfMonth != mDay ) {
+				mYear=year;
+				mMonth=monthOfYear+1;
+				mDay=dayOfMonth;
+				String selDate = String.format("%4d-%2d-%2d",mYear,mMonth,mDay);  
+				Log.i("onDateSetListener",selDate);
+
+				updateDateDisplay();
+			}
+//			datePickerDialog.dismiss();
 		}
+
 	};
+
+	private void updateDateDisplay() {
+		Log.i("updateDateDisplay","called");
+		currentDateView.setText(new StringBuilder().append(mYear).append("-").append(mMonth));
+		Intent chartIntent = new Intent(getApplicationContext(), ChartActivity.class);
+		//chartIntent.putExtra("type", "elec");
+		//chartIntent.putExtra("date",todayString);
+		chartIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		startActivity(chartIntent);
+	}
 	
 	@Override
 	protected void onResume() {
+		Log.i("onResume","called");
 		super.onResume();
 		CookieSyncManager.getInstance().startSync();
 	}
 	
 	@Override
 	protected void onPause() {
+		Log.i("onPause","called");
 		super.onPause();
 		CookieSyncManager.getInstance().stopSync();
 	}
@@ -167,6 +257,11 @@ public class ChartActivity extends AbstractAsyncActivity {
 	protected void onSaveInstanceState(Bundle outstate) {
 		outstate.putString("kind",intentKindParam);
 		outstate.putString("date",intentDateParam);
+		outstate.putInt("mYear", mYear);
+		outstate.putInt("mMonth", mMonth);
+		outstate.putInt("mDay", mDay);
+		
+		super.onSaveInstanceState(outstate);
 	}
 
 	private class FetchDailyDataTask extends AsyncTask<String, Void, String> {
@@ -184,22 +279,21 @@ public class ChartActivity extends AbstractAsyncActivity {
 		
 			try { 
 				URL url = new URL(getString(R.string.base_url)+uri);
-				Log.i("param1",params.toString());
-				String [] dateStrArray = params[1].split("-");
+
 				String postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + 
-						"&selYear=" + dateStrArray[0] + "&selMonth=" + Integer.parseInt(dateStrArray[1]) + 
+						"&selYear=" + mYear + "&selMonth=" + mMonth + 
 								"&sKind="+params[0].toUpperCase();
-				Log.i("url",postParams);
 
 				resultMap.put("kind",params[0]);
-				resultMap.put("date",params[1]);
+				resultMap.put("date",String.format("%4d-%2d-%2d",mYear,mMonth,mDay));
 				if ( cookieString != null ) {
 					Log.i("cookie",cookieString);
 					resultMap.put("html", HttpClientForParkrio.fetch(url, cookieString, postParams));
 					postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + 
-							"&selYear=" + (Integer.parseInt(dateStrArray[0])-1) + "&selMonth=" + Integer.parseInt(dateStrArray[1]) + 
+							"&selYear=" + mYear + "&selMonth=" + mMonth + 
 									"&sKind="+params[0].toUpperCase();
 					resultMap.put("lastyear", HttpClientForParkrio.fetch(url, cookieString, postParams));
+					Log.i("url",postParams);
 
 				} else {
 					// if no-cookie then debug mode
@@ -219,7 +313,6 @@ public class ChartActivity extends AbstractAsyncActivity {
 
 			try {
 				List<Double> parseValue = parseMonthlyValuePage(resultMap.get("html").toString());
-				
 				// bar chart
 				setBarChart(parseValue,resultMap.get("kind").toString(),resultMap.get("date").toString());
 				
@@ -231,6 +324,8 @@ public class ChartActivity extends AbstractAsyncActivity {
 			}			
 			super.onPostExecute(html);
 		}
+		
+		
 	}
 		private Map<String,Object> getKindInfo (String kind) {
 			Map<String,Object> result = new HashMap<String,Object>();
@@ -264,12 +359,12 @@ public class ChartActivity extends AbstractAsyncActivity {
 		}
 		
 		private void setBarChart(List<Double> parseValue,String kind, String dateString) {
+			Log.i("setBarChart","called");
 			XYMultipleSeriesRenderer renderer = new XYMultipleSeriesRenderer();
 			
 			Map kindInfo = getKindInfo(kind);
-			String[] dateStringParse = dateString.split("-");
 			
-			renderer.setChartTitle(Integer.parseInt(dateStringParse[1]) + "월 " + kindInfo.get("title").toString());
+			renderer.setChartTitle(Integer.toString(mYear)+"년"+Integer.toString(mMonth) + "월 " + kindInfo.get("title").toString());
 			renderer.setChartTitleTextSize(20);
 			
 			String[] titles = new String[] {kindInfo.get("name").toString()};
@@ -338,6 +433,7 @@ public class ChartActivity extends AbstractAsyncActivity {
 			GraphicalView gv = ChartFactory.getBarChartView(getApplicationContext(), dataset, renderer, Type.STACKED);
 			// 그래프를 LinearLayout에 추가
 			LinearLayout llBody = (LinearLayout) findViewById(R.id.chart_area);
+			llBody.removeAllViewsInLayout();
 			llBody.addView(gv);
 		}
 

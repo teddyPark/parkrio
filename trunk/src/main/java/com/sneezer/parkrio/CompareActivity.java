@@ -3,8 +3,6 @@ package com.sneezer.parkrio;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -18,10 +16,12 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.util.Log;
 
 import net.htmlparser.jericho.Element;
@@ -140,7 +140,7 @@ public class CompareActivity extends AbstractAsyncActivity {
 		}
 	}
 	
-	private class FetchDailyDataTask extends AsyncTask<String, Void, String> {
+	private class FetchDailyDataTask extends AsyncTask<String, Void, Long> {
 		Map <String, String> htmls = new HashMap<String, String>();
 		private final String viewstateParam = "/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=";
 		private final String serverCharset = "EUC-KR";
@@ -152,7 +152,7 @@ public class CompareActivity extends AbstractAsyncActivity {
 		}
 
 		@Override
-		protected String doInBackground(String... params) {
+		protected Long doInBackground(String... params) {
 			// TODO Auto-generated method stub
 			String html = new String();
 
@@ -188,42 +188,50 @@ public class CompareActivity extends AbstractAsyncActivity {
 				postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + "&txtFDate=" + dateString;
 				Log.i("params",postParams);
 				htmls.put("lastmonth_firstday", HttpClientForParkrio.fetch(url, cookieString, postParams));
-				
+
+				return ((long) 0);
+
 			} catch (Exception e) {
 				e.printStackTrace();
+
+				return ((long) 1);
 			}
-			return html.toString();
+
 		}
 		
 		@Override
-		protected void onPostExecute(String html) {
+		protected void onPostExecute(Long result) {
 			dismissProgressDialog();
 
-			try {
-				// 금일 검침 setText
-				Map <String,Measurement> getData1 = parseDayValuePage(htmls.get("today"));
-				setMeasurementText("today", getData1.get("today"));
-				
-				// 전일 검침 setText
-				Map <String,Measurement> getData2 = parseDayValuePage(htmls.get("yesterday"));
-				setMeasurementText("yesterday", getData2.get("today"));
-				
-				// 이번달 검침 setText
-				Map <String,Measurement> getData3 = parseDayValuePage(htmls.get("thismonth_firstday"));
-				Log.i("today",getData3.get("current").toString());
-				Log.i("firstday",getData1.get("current").toString());
-				setMeasurementText("thismonth", getData1.get("current").compare(getData3.get("current")));
-
-				// 지난달 검침 setText
-				Map <String,Measurement> getData4 = parseDayValuePage(htmls.get("lastmonth_firstday"));
-				Log.i("today",getData4.get("current").toString());
-				Log.i("firstday",getData3.get("current").toString());
-				setMeasurementText("lastmonth", getData3.get("current").compare(getData4.get("current")));
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}			
-			super.onPostExecute(html);
+			if ( result.intValue() == 1 ) {
+				Toast.makeText(CompareActivity.this, "데이터를 가져오는데 실패하였습니다.\n밤12시부터 새벽 1시까지는 데이터 취합으로 조회가 되지 않을 수 있습니다.", Toast.LENGTH_LONG).show();
+			} else {
+				try {
+					// 금일 검침 setText
+					Map <String,Measurement> getData1 = parseDayValuePage(htmls.get("today"));
+					setMeasurementText("today", getData1.get("today"));
+					
+					// 전일 검침 setText
+					Map <String,Measurement> getData2 = parseDayValuePage(htmls.get("yesterday"));
+					setMeasurementText("yesterday", getData2.get("today"));
+					
+					// 이번달 검침 setText
+					Map <String,Measurement> getData3 = parseDayValuePage(htmls.get("thismonth_firstday"));
+					Log.i("today",getData3.get("current").toString());
+					Log.i("firstday",getData1.get("current").toString());
+					setMeasurementText("thismonth", getData1.get("current").compare(getData3.get("current")));
+	
+					// 지난달 검침 setText
+					Map <String,Measurement> getData4 = parseDayValuePage(htmls.get("lastmonth_firstday"));
+					Log.i("today",getData4.get("current").toString());
+					Log.i("firstday",getData3.get("current").toString());
+					setMeasurementText("lastmonth", getData3.get("current").compare(getData4.get("current")));
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			super.onPostExecute(result);
 		}
 		
 	}
@@ -291,13 +299,6 @@ public class CompareActivity extends AbstractAsyncActivity {
 		return resultMap;
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.compare, menu);
-		return true;
-	}
-	
 	public String readAsset (Context context, String filename) {
 		AssetManager am = context.getResources().getAssets();
 		InputStream is = null;
