@@ -13,13 +13,14 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:gravity="center"
-        android:paddingTop="20dp"
         android:paddingBottom="20dp"
+        android:paddingTop="20dp"
         android:text="@string/loginPageTitle"
         android:textColor="#ffffffFF"
         android:textSize="24sp" />
 
     <RelativeLayout
+        android:id="@+id/relativeLayout2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -68,17 +69,17 @@
             android:layout_marginLeft="20dp"
             android:layout_marginTop="20dp"
             android:text="@string/rememberidLabel" />
-        
-		<CheckBox
+
+        <CheckBox
             android:id="@+id/autologinChk"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/passwordLabel"
-            android:layout_toRightOf="@id/rememberChk"
             android:layout_marginLeft="40dp"
             android:layout_marginTop="20dp"
+            android:layout_toRightOf="@id/rememberChk"
             android:text="@string/autologinLabel" />
-		
+
         <Button
             android:id="@+id/loginBtn"
             android:layout_width="100sp"
@@ -99,5 +100,15 @@
             android:layout_marginTop="26dp"
             android:text="@string/exitBtnText" />
     </RelativeLayout>
+
+    <TextView
+        android:id="@+id/AppDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/relativeLayout2"
+        android:layout_marginLeft="40dp"
+        android:text=""
+        android:textStyle="italic" />
 
 </RelativeLayout>

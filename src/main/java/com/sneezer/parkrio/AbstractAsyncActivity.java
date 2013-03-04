@@ -18,6 +18,11 @@ package com.sneezer.parkrio;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 
 /**
  * @author Roy Clarkson
@@ -63,4 +68,36 @@ public abstract class AbstractAsyncActivity extends Activity {
 		}
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		//getMenuInflater().inflate(R.menu.compare, menu);
+		super.onCreateOptionsMenu(menu);
+		MenuItem item = menu.add(0,1,0,"로그아웃");
+		menu.add(0,2,0,"자동로그인 해제");
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		switch (item.getItemId()) {
+		case 1: logout();
+			return true;
+		case 2:
+			return true;
+		}
+		return false;
+	}
+		
+	public boolean logout() {
+		//cookieManager.setCookie(base_url, "");
+		//CookieSyncManager.getInstance().sync();
+
+		Intent startIntent = new Intent(getApplicationContext(), MainActivity.class);
+		startIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(startIntent);
+		finish();		
+		return true;
+	}
 }

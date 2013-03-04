@@ -22,6 +22,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.View;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
@@ -50,20 +52,23 @@ public class MainActivity extends AbstractAsyncActivity {
 		super.onCreate(savedInstanceState);
 		// Log.i(TAG, "onCreate");
 		setContentView(R.layout.main);
-		this.base_url = getString(R.string.base_url);
+		base_url = getString(R.string.base_url);
 
 		cookieManager = CookieManager.getInstance();
 		CookieSyncManager.createInstance(getApplicationContext());
 		CookieSyncManager.getInstance().startSync();
 
+		TextView appDesc = (TextView) findViewById(R.id.AppDescription);
+		appDesc.setText("이 앱을 사용하기 위해서는\n"+base_url+" 로 접속하셔서\n회원가입을 하시고 관리자가 승인하여야 합니다.");
+		Linkify.addLinks(appDesc, Linkify.ALL);
+		appDesc.setMovementMethod(LinkMovementMethod.getInstance());
+		
 		if (DEBUG) {
-			String base_url = getString(R.string.base_url);
-			
 			String cookieString = "ASP.NET_SessionId=asdasdfasdfasdfasdf; path=/";
 			cookieManager.setCookie(base_url, cookieString);
 			CookieSyncManager.getInstance().sync();
 			
-			Intent compareIntent = new Intent(getApplicationContext(), CompareActivity.class);
+			Intent compareIntent = new Intent(MainActivity.this, CompareActivity.class);
 			compareIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(compareIntent);
 		}
@@ -78,6 +83,8 @@ public class MainActivity extends AbstractAsyncActivity {
 		final EditText inputPassword = (EditText) findViewById(R.id.passwordEntry);
 		final CheckBox rememberChk = (CheckBox) findViewById(R.id.rememberChk);
 		final CheckBox autologinChk = (CheckBox) findViewById(R.id.autologinChk);
+
+		inputUsername.setPrivateImeOptions("defaultInputmode=english;");
 
 		// 저장되어 있는 userid/password 를 셋팅
 		if (isRemember) {
@@ -135,7 +142,7 @@ public class MainActivity extends AbstractAsyncActivity {
 
 	@Override
 	public void showLoadingProgressDialog() {
-		this.showProgressDialog("로그인 중. 잠시만 기다려주세요...");
+		this.showProgressDialog("로그인 중 입니다.\n잠시만 기다려주세요...");
 	}
 	
 	@Override
@@ -248,7 +255,7 @@ public class MainActivity extends AbstractAsyncActivity {
 				startActivity(compareIntent);
 				finish();
 			} else {
-				Toast.makeText(getApplicationContext(), "로그인 실패. ID/비밀번호를 확인하세요.", Toast.LENGTH_LONG).show();
+				Toast.makeText(getApplicationContext(), "로그인 실패.\nID/비밀번호를 확인하세요.", Toast.LENGTH_LONG).show();
 			}
 			
 		}
