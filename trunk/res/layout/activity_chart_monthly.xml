@@ -6,7 +6,7 @@
     android:orientation="vertical" >
     
 	<LinearLayout android:id="@+id/chart_area" 
-		android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="15dp" android:background="#ffffff" android:layout_weight="1" />
+		android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="15dp" android:background="#FFFFFF" android:layout_weight="1" />
 	
 	<LinearLayout
 	    android:layout_width="wrap_content"
@@ -18,7 +18,7 @@
 		    android:id="@+id/prevYearBtn"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:minWidth="40dp"
+		    android:minWidth="35dp"
 		    android:text="＜＜"
 		    android:textSize="15dp" />
 
@@ -34,9 +34,8 @@
 		    android:id="@+id/currentDateEntry"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:minWidth="100dp"
+		    android:minWidth="70dp"
 		    android:gravity="center"
-		    android:text="2013-01"
 		    android:textAppearance="?android:attr/textAppearanceMedium" />
 
 		<Button
@@ -51,9 +50,15 @@
 		    android:id="@+id/nextYearBtn"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:minWidth="40dp"
+		    android:minWidth="35dp"
 		    android:text="＞＞"
 		    android:textSize="15dp"  />
-		
+
+		<Button
+		    android:id="@+id/yearlyChartBtn"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="연간"
+		    android:textSize="15dp"  />				
 	</LinearLayout>
 </LinearLayout>

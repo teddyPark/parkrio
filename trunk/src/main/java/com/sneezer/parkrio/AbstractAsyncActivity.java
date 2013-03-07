@@ -16,9 +16,13 @@
 
 package com.sneezer.parkrio;
 
+import java.io.InputStream;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.CookieManager;
@@ -74,8 +78,12 @@ public abstract class AbstractAsyncActivity extends Activity {
 		//getMenuInflater().inflate(R.menu.compare, menu);
 		super.onCreateOptionsMenu(menu);
 		MenuItem item = menu.add(0,1,0,"로그아웃");
-		menu.add(0,2,0,"자동로그인 해제");
+		//menu.add(0,2,0,"자동로그인 해제");
 		return true;
+	}
+	
+	public void changeChart() {
+		// todo
 	}
 	
 	@Override
@@ -84,20 +92,57 @@ public abstract class AbstractAsyncActivity extends Activity {
 		switch (item.getItemId()) {
 		case 1: logout();
 			return true;
-		case 2:
+		case 2: changeChart();
 			return true;
 		}
 		return false;
 	}
 		
+	
 	public boolean logout() {
-		//cookieManager.setCookie(base_url, "");
-		//CookieSyncManager.getInstance().sync();
-
 		Intent startIntent = new Intent(getApplicationContext(), MainActivity.class);
 		startIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startIntent.putExtra("needLogin", true);
 		startActivity(startIntent);
 		finish();		
 		return true;
 	}
+
+	public boolean cancelAutologin() {
+		Intent startIntent = new Intent(getApplicationContext(), MainActivity.class);
+		startIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startIntent.putExtra("needLogin", true);
+		startActivity(startIntent);
+		finish();		
+		return true;
+	}
+
+	public String readAsset(Context context, String filename) {
+		AssetManager am = context.getResources().getAssets();
+		InputStream is = null;
+		String result = null;
+		try {
+			is = am.open(filename);
+			int size = is.available();
+
+			if (size > 0) {
+				byte[] data = new byte[size];
+				is.read(data);
+				result = new String(data);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (is != null) {
+				try {
+					is.close();
+					is = null;
+				} catch (Exception e) {
+				}
+			}
+		}
+		am = null;
+		return result;
+	}
+	
 }

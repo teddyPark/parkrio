@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">파크리오 원격검침</string>
-    <string name="base_url">http://211.49.175.211/</string>
+    <string name="app_name">잠실 파크리오 원격검침</string>
+    <string name="base_url">http://211.49.175.211</string>
     <string name="loginPageTitle">잠실 파크리오 아파트
 원격검침</string>
     <string name="usernameLabel">Username :</string>
@@ -22,5 +22,6 @@
     <string name="titleHeat">난방㎥</string>
     <string name="titleGas">가스㎥</string>
     <string name="titleWater">수도㎥</string>
- 
+ 	<string name="monthlyChartBtnLabel">월간차트</string>
+ 	<string name="yearlyChartBtnLabel">년간차트</string>
 </resources>

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">잠실 파크리오</string>
+    <string name="app_name">잠실 파크리오 원격검침</string>
     <string name="base_url">http://211.49.175.211/</string>
     <string name="loginPageTitle">잠실 파크리오 아파트
 원격검침</string>
     <string name="usernameLabel">Username :</string>
     <string name="passwordLabel">Password :</string>
-    <string name="rememberidLabel">ID/비밀번호 기억하기</string>
+    <string name="rememberidLabel">기억하기</string>
+    <string name="autologinLabel">자동로그인</string>
     <string name="loginBtnText">로그인</string>
     <string name="exitBtnText">종료</string>
     <string name="title_activity_chart">검침 차트</string>
@@ -15,12 +16,11 @@
     <string name="title_section1">일별</string>
     <string name="title_section2">월별</string>
     <string name="title_section3">연별</string>
-    <string name="title_activity_compare">당일 사용량</string>
-    <string name="titleElect">전기</string>
-    <string name="titleHotwater">온수</string>
-    <string name="titleHeat">난방</string>
-    <string name="titleGas">가스</string>
-    <string name="titleWater">수도</string>
-    <string name="textSize_type">10dp</string>
-
+    <string name="title_activity_compare">오늘의 사용량</string>
+    <string name="titleElect">전기㎾</string>
+    <string name="titleHotwater">온수㎥</string>
+    <string name="titleHeat">난방㎥</string>
+    <string name="titleGas">가스㎥</string>
+    <string name="titleWater">수도㎥</string>
+ 
 </resources>

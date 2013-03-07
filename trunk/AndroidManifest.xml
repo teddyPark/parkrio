@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.sneezer.parkrio"
-    android:versionCode="1"
-    android:versionName="0.0.1-SNAPSHOT" >
+    android:versionCode="6"
+    android:versionName="${project.version}" >
 
     <uses-sdk
         android:minSdkVersion="11"
@@ -20,12 +20,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />                
             </intent-filter>
         </activity>
+        
         <activity android:name="com.sneezer.parkrio.CompareActivity"
             android:label="@string/title_activity_compare" >
         </activity>
-        <activity android:name="com.sneezer.parkrio.ChartActivity"
+        
+        <activity android:name="com.sneezer.parkrio.ChartActivity_Monthly"
             android:label="@string/title_activity_chart" >
         </activity>
+
+        <activity android:name="com.sneezer.parkrio.ChartActivity_Yearly"
+            android:label="@string/title_activity_chart" >
+        </activity>
+        
         </application>
 
 </manifest>
