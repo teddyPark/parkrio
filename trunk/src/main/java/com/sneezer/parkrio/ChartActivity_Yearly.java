@@ -274,6 +274,8 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 			// TODO Auto-generated method stub
 
 			try {
+				MeasurementDBHelper db = new MeasurementDBHelper(getApplicationContext());
+				
 				URL url = new URL(getString(R.string.base_url) + SERVER_URI);
 
 				resultMap.put("kind", params[0]);
@@ -288,6 +290,7 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 					resultMap.put("html", client.fetch(url, cookieString, postParams));
 					Log.i("url", postParams);
 
+					db.getYearlyData(mYear-1);
 					postParams = "__VIEWSTATE="
 							+ URLEncoder.encode(PARAM_VIEWSTATE, SERVER_CHARSET)
 							+ "&selYear=" + (mYear-1) + "&selMonth=" + mMonth
