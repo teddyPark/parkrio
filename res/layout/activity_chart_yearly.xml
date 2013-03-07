@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical" >
+    
+	<LinearLayout android:id="@+id/chart_area" 
+		android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="15dp" android:background="#FFFFFF" android:layout_weight="1" />
+	
+	<LinearLayout
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:gravity="center"
+	    android:orientation="horizontal" >
+
+		<Button
+		    android:id="@+id/prevYearBtn"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:minWidth="40dp"
+		    android:text="＜＜"
+		    android:textSize="15dp" />
+
+		<TextView
+		    android:id="@+id/currentDateEntry"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:minWidth="100dp"
+		    android:gravity="center"
+		    android:text=""
+		    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+		<Button
+		    android:id="@+id/nextYearBtn"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:minWidth="40dp"
+		    android:text="＞＞"
+		    android:textSize="15dp"  />
+		
+	</LinearLayout>
+</LinearLayout>

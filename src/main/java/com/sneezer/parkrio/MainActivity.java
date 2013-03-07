@@ -21,6 +21,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.view.Menu;
 import android.view.View;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
@@ -34,12 +35,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AbstractAsyncActivity {
-	private static final boolean DEBUG = false;
 
 	private static String TAG = "parkrio";
 	private SharedPreferences preferences;
 	private CookieManager cookieManager;
-	private String base_url;
+	private String serverHostName;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -50,40 +50,70 @@ public class MainActivity extends AbstractAsyncActivity {
 			StrictMode.setThreadPolicy(policy);
 		}
 		super.onCreate(savedInstanceState);
-		// Log.i(TAG, "onCreate");
-		setContentView(R.layout.main);
-		base_url = getString(R.string.base_url);
+
+		setContentView(R.layout.activity_login);
+		
+		serverHostName = getString(R.string.base_url);
 
 		cookieManager = CookieManager.getInstance();
 		CookieSyncManager.createInstance(getApplicationContext());
 		CookieSyncManager.getInstance().startSync();
-
-		TextView appDesc = (TextView) findViewById(R.id.AppDescription);
-		appDesc.setText("이 앱을 사용하기 위해서는\n"+base_url+" 로 접속하셔서\n회원가입을 하시고 관리자가 승인하여야 합니다.");
-		Linkify.addLinks(appDesc, Linkify.ALL);
-		appDesc.setMovementMethod(LinkMovementMethod.getInstance());
-		
-		if (DEBUG) {
-			String cookieString = "ASP.NET_SessionId=asdasdfasdfasdfasdf; path=/";
-			cookieManager.setCookie(base_url, cookieString);
-			CookieSyncManager.getInstance().sync();
-			
-			Intent compareIntent = new Intent(MainActivity.this, CompareActivity.class);
-			compareIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(compareIntent);
-		}
-		final SharedPreferences preferences = getSharedPreferences("USER_INFO",	MODE_PRIVATE);
-
-		String username = preferences.getString("username", "");
-		String password = preferences.getString("password", "");
-		boolean isRemember = preferences.getBoolean("isRemember", false);
-		boolean isAutoLogin = preferences.getBoolean("isAutoLogin", false);
 
 		final EditText inputUsername = (EditText) findViewById(R.id.useridEntry);
 		final EditText inputPassword = (EditText) findViewById(R.id.passwordEntry);
 		final CheckBox rememberChk = (CheckBox) findViewById(R.id.rememberChk);
 		final CheckBox autologinChk = (CheckBox) findViewById(R.id.autologinChk);
 
+		// App description
+		TextView appDesc = (TextView) findViewById(R.id.AppDescription);
+		appDesc.setText("이 앱을 사용하기 위해서는\n"+serverHostName+" 로 접속하셔서\n회원가입을 하시고 관리자가 승인하여야 합니다.");
+		Linkify.addLinks(appDesc, Linkify.ALL);
+		appDesc.setMovementMethod(LinkMovementMethod.getInstance());
+		
+		findViewById(R.id.autologinChk).setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (autologinChk.isChecked()) {
+					rememberChk.setChecked(true);
+				}
+			}
+		});
+		
+		findViewById(R.id.loginBtn).setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+					
+					SharedPreferences.Editor editor = preferences.edit();
+					editor.putString("username", inputUsername.getText().toString());
+					editor.putString("password", inputPassword.getText().toString());
+					editor.putBoolean("isRemember", rememberChk.isChecked());
+					editor.putBoolean("isAutoLogin", autologinChk.isChecked());
+					
+					editor.commit();
+				new FetchSecuredResourceTask().execute();
+				
+			}
+		});
+		
+		findViewById(R.id.exitBtn).setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				finish();
+			}
+		});
+
+		
+		
+		preferences = getSharedPreferences("USER_INFO",	MODE_PRIVATE);
+
+		// shared preference 값을 읽어옴.
+		String username = preferences.getString("username", "");
+		String password = preferences.getString("password", "");
+		boolean isRemember = preferences.getBoolean("isRemember", false);
+		boolean isAutoLogin = preferences.getBoolean("isAutoLogin", false);
+		
+
+		// ID 입력칸은 영문 키보드로...
 		inputUsername.setPrivateImeOptions("defaultInputmode=english;");
 
 		// 저장되어 있는 userid/password 를 셋팅
@@ -94,50 +124,9 @@ public class MainActivity extends AbstractAsyncActivity {
 			autologinChk.setChecked(isAutoLogin);
 		}
 
-		if (isAutoLogin) {
+		if (isAutoLogin && !(getIntent().getBooleanExtra("needLogin", false))) {
 			new FetchSecuredResourceTask().execute();
 		}
-		
-		CheckBox autoChk = (CheckBox) findViewById(R.id.autologinChk);
-		autoChk.setOnClickListener(new View.OnClickListener() {
-			
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				if (autologinChk.isChecked()) {
-					rememberChk.setChecked(true);
-				}
-			}
-		});
-			
-		
-		Button loginBtn = (Button) findViewById(R.id.loginBtn);
-		loginBtn.setOnClickListener(new View.OnClickListener() {
-
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				if (((CheckBox) findViewById(R.id.rememberChk)).isChecked()) {
-
-					SharedPreferences.Editor editor = preferences.edit();
-					editor.putString("username", inputUsername.getText().toString());
-					editor.putString("password", inputPassword.getText().toString());
-					editor.putBoolean("isRemember", rememberChk.isChecked());
-					editor.putBoolean("isAutoLogin", autologinChk.isChecked());
-					
-					editor.commit();
-				}
-				new FetchSecuredResourceTask().execute();
-
-			}
-		});
-
-		Button exitBtn = (Button) findViewById(R.id.exitBtn);
-		exitBtn.setOnClickListener(new View.OnClickListener() {
-
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				finish();
-			}
-		});
 	}
 
 	@Override
@@ -156,6 +145,12 @@ public class MainActivity extends AbstractAsyncActivity {
 		super.onPause();
 		CookieSyncManager.getInstance().stopSync();
 	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		return true;
+	}
+	
 	private class FetchSecuredResourceTask extends AsyncTask<Void, Void, Message> {
 		private String username;
 		private String password;
@@ -168,6 +163,7 @@ public class MainActivity extends AbstractAsyncActivity {
 			// get username / password
 			EditText editText = (EditText) findViewById(R.id.useridEntry);
 			this.username = editText.getText().toString();
+			
 			editText = (EditText) findViewById(R.id.passwordEntry);
 			this.password = editText.getText().toString();
 			
@@ -180,15 +176,9 @@ public class MainActivity extends AbstractAsyncActivity {
 			boolean isLogon = false;
 			HttpResponse response = null;
 
-			// get username / password
-			EditText editText = (EditText) findViewById(R.id.useridEntry);
-			this.username = editText.getText().toString();
-			editText = (EditText) findViewById(R.id.passwordEntry);
-			this.password = editText.getText().toString();
-
 			// set http client
 			DefaultHttpClient httpclient = new DefaultHttpClient();
-			HttpPost httpost = new HttpPost(base_url+"index_iframe.aspx");
+			HttpPost httpost = new HttpPost(serverHostName+"/index_iframe.aspx");
 			
 			// set parameter
 			List <NameValuePair> requestParams = new ArrayList<NameValuePair>();
@@ -199,12 +189,11 @@ public class MainActivity extends AbstractAsyncActivity {
 				((HttpPost) httpost).setEntity(new UrlEncodedFormEntity(requestParams));
 				response = httpclient.execute(httpost);
 			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
 			if ( response != null ) {
 				HttpEntity httpEntity = response.getEntity();
 
@@ -219,7 +208,7 @@ public class MainActivity extends AbstractAsyncActivity {
 		        	}
 		        	br.close();
 		        } catch (Exception e) {
-		        	 
+		        	e.printStackTrace();
 		        }
 
 		        if ( html.toString().indexOf("alert") == -1 ) {
@@ -236,7 +225,7 @@ public class MainActivity extends AbstractAsyncActivity {
 	        	for ( int i=0 ; i< cookies.size(); i++ ) {
 					if (cookies.get(i).getName().equals("ASP.NET_SessionId")) {
 						String cookieString = cookies.get(i).getName()+"="+cookies.get(i).getValue() +"; path=" + cookies.get(i).getPath();
-						cookieManager.setCookie(base_url, cookieString);
+						cookieManager.setCookie(serverHostName, cookieString);
 						CookieSyncManager.getInstance().sync();
 					}
 				}
@@ -257,8 +246,6 @@ public class MainActivity extends AbstractAsyncActivity {
 			} else {
 				Toast.makeText(getApplicationContext(), "로그인 실패.\nID/비밀번호를 확인하세요.", Toast.LENGTH_LONG).show();
 			}
-			
 		}
-
 	}
 }
