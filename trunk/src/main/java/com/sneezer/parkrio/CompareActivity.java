@@ -274,8 +274,8 @@ public class CompareActivity extends AbstractAsyncActivity {
 			
 			if (i == 0) {
 				// 전기
-				currentMeasurement.setElect(currentValue);
-				todayMeasurement.setElect(todayuseValue);
+				currentMeasurement.setElec(currentValue);
+				todayMeasurement.setElec(todayuseValue);
 			} else if ( i == 1 ) {
 				// 수도
 				currentMeasurement.setWater(currentValue);

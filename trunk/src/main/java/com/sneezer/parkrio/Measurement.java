@@ -4,17 +4,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Measurement {
-	private float elect = 0;	// 전기
+	public static String[] kindList= new String[] {"elec","hotwater","heat","water","gas"};
+	
+	private float elec = 0;	// 전기
 	private float hotwater = 0;	// 온수
 	private float heat = 0;	// 난방
 	private float water = 0;	// 수도
 	private float gas = 0;	// 가스
 	
-	public float getElect() {
-		return elect;
+	public float getElec() {
+		return elec;
 	}
-	public void setElect(float elect) {
-		this.elect = elect;
+	public void setElec(float elec) {
+		this.elec = elec;
 	}
 	public float getHotwater() {
 		return hotwater;
@@ -41,11 +43,11 @@ public class Measurement {
 		this.gas = gas;
 	}
 	public String toString() {
-		return (new String(this.elect+";"+this.hotwater+";"+this.heat+";"+this.water+";"+this.gas));
+		return (new String(this.elec+";"+this.hotwater+";"+this.heat+";"+this.water+";"+this.gas));
 	}
 	public Map<String, Float> getObject(){
 		Map<String, Float> resultMap = new HashMap<String,Float>();
-		resultMap.put("Elect", elect);
+		resultMap.put("Elect", elec);
 		resultMap.put("Hotwater", hotwater);
 		resultMap.put("Heat", heat);
 		resultMap.put("Water", water);
@@ -57,7 +59,7 @@ public class Measurement {
 	public Measurement compare(Measurement smallMeasure) {
 		Measurement resultMeasure = new Measurement();
 		
-		resultMeasure.setElect(elect - smallMeasure.getElect());
+		resultMeasure.setElec(elec - smallMeasure.getElec());
 		resultMeasure.setHotwater(hotwater - smallMeasure.getHotwater());
 		resultMeasure.setHeat(heat - smallMeasure.getHeat());
 		resultMeasure.setWater(water - smallMeasure.getWater());
