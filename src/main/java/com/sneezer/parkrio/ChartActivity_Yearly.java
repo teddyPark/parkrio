@@ -272,9 +272,10 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 		@Override
 		protected String doInBackground(String... params) {
 			// TODO Auto-generated method stub
+			
 
+			
 			try {
-				MeasurementDBHelper db = new MeasurementDBHelper(getApplicationContext());
 				
 				URL url = new URL(getString(R.string.base_url) + SERVER_URI);
 
@@ -290,15 +291,14 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 					resultMap.put("html", client.fetch(url, cookieString, postParams));
 					Log.i("url", postParams);
 
-					db.getYearlyData(mYear-1);
-					postParams = "__VIEWSTATE="
-							+ URLEncoder.encode(PARAM_VIEWSTATE, SERVER_CHARSET)
-							+ "&selYear=" + (mYear-1) + "&selMonth=" + mMonth
-							+ "&sKind=" + intentKindParam.toUpperCase();
-					client = new HttpClientForParkrio();
-					resultMap.put("lastyear", client.fetch(url, cookieString, postParams));
-					Log.i("url", postParams);
-
+ 
+						postParams = "__VIEWSTATE="
+								+ URLEncoder.encode(PARAM_VIEWSTATE, SERVER_CHARSET)
+								+ "&selYear=" + (mYear-1) + "&selMonth=" + mMonth
+								+ "&sKind=" + intentKindParam.toUpperCase();
+						client = new HttpClientForParkrio();
+						resultMap.put("lastyear", client.fetch(url, cookieString, postParams));
+						Log.i("url", postParams);
 				} else {
 					// if no-cookie then debug mode
 					resultMap.put("html", readAsset(getApplicationContext(), SERVER_URI));
@@ -685,6 +685,16 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 			List<double[]> xValues, List<double[]> yValues) {
 		XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
 		addXYSeries(dataset, titles, xValues, yValues, 0);
+
+		for ( int j =0 ; j < dataset.getSeriesCount() ; j++) {
+			XYSeries temp = dataset.getSeriesAt(j);
+			Log.i("title",temp.getTitle());
+			Log.i("scale",Integer.toString(temp.getScaleNumber()));
+			for ( int i=0;i< 12 ;i++) {
+				Log.i(Double.toString(temp.getX(i)),Double.toString(temp.getY(i)));
+			}
+		}
+		
 		return dataset;
 	}
 

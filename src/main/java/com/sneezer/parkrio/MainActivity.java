@@ -41,6 +41,8 @@ public class MainActivity extends AbstractAsyncActivity {
 	private CookieManager cookieManager;
 	private String serverHostName;
 	
+	private MeasurementDBAdapter dbAdapter;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
@@ -69,6 +71,10 @@ public class MainActivity extends AbstractAsyncActivity {
 		appDesc.setText("이 앱을 사용하기 위해서는\n"+serverHostName+" 로 접속하셔서\n회원가입을 하시고 관리자가 승인하여야 합니다.");
 		Linkify.addLinks(appDesc, Linkify.ALL);
 		appDesc.setMovementMethod(LinkMovementMethod.getInstance());
+		
+		dbAdapter = new MeasurementDBAdapter(this);
+		dbAdapter.open();
+		dbAdapter.close();
 		
 		findViewById(R.id.autologinChk).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
