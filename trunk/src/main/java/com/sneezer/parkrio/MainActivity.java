@@ -72,10 +72,7 @@ public class MainActivity extends AbstractAsyncActivity {
 		Linkify.addLinks(appDesc, Linkify.ALL);
 		appDesc.setMovementMethod(LinkMovementMethod.getInstance());
 		
-		dbAdapter = new MeasurementDBAdapter(this);
-		dbAdapter.open();
-		dbAdapter.close();
-		
+
 		findViewById(R.id.autologinChk).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if (autologinChk.isChecked()) {
@@ -129,6 +126,9 @@ public class MainActivity extends AbstractAsyncActivity {
 			rememberChk.setChecked(isRemember);
 			autologinChk.setChecked(isAutoLogin);
 		}
+
+		dbAdapter = new MeasurementDBAdapter(this);
+		dbAdapter.open();
 
 		if (isAutoLogin && !(getIntent().getBooleanExtra("needLogin", false))) {
 			new FetchSecuredResourceTask().execute();
@@ -236,11 +236,13 @@ public class MainActivity extends AbstractAsyncActivity {
 					}
 				}
 	        }			
+
 	        return null;
 		}
 
 		@Override
 		protected void onPostExecute(Message result) {
+			//dbAdapter.close();			
 			dismissProgressDialog();
 			
 			if ( isLogon ) {

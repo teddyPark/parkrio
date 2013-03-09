@@ -59,13 +59,12 @@ import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
 
 public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGestureListener {
-	private final static String DEFAULT_CHART = "lineChart"; 
-	private final static String PARAM_VIEWSTATE = "/wEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4=";
-	private final static String SERVER_CHARSET = "EUC-KR";
+	private final static String DEFAULT_CHART = "lineChart";
+	private final static int COUNT_DISPLAY_CHART = 2; 
 	private final static String SERVER_URI = "/hwork/iframe_MonthGraph.aspx";
 	private final static String SERVER_URI2 = "/hwork/iframe_MonthGraph2.aspx";
 	private final static int DATE_DIALOG_ID = 0;
-	private final static String TAG = "chartActivity";
+	private final static String TAG = "MonthChartActivity";
 	
 	private CookieManager cookieManager;
 	private SharedPreferences preferences;
@@ -88,10 +87,6 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
     private static final int SWIPE_MAX_OFF_PATH = 250;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 
-	//Map<String, Object> resultMap = new HashMap<String, Object>();
-	
-	private List<Double> nowValues = new ArrayList<Double>();
-	private List<Double> lastyearValues = new ArrayList<Double>();
 	private static final int[] chartColorSet = new int[] { Color.RED, Color.BLUE, Color.MAGENTA, Color.GREEN };
 	private static final PointStyle[] chartPointStyleSet = new PointStyle[] { PointStyle.CIRCLE, PointStyle.DIAMOND, PointStyle.TRIANGLE, PointStyle.SQUARE };
 	
@@ -319,7 +314,6 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 
 			try {
 				URL url = new URL(getString(R.string.base_url) + SERVER_URI);
-
 				
 				if (cookieString != null) {
 					Log.i("cookie", cookieString);
@@ -329,19 +323,19 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 					HttpClientForParkrio client;
 					// 과거 데이터 DB insert
 					Calendar cal = Calendar.getInstance();
-					for ( int i=0 ; i < 4 ; i++ ) {
+					for ( int i=0 ; i < COUNT_DISPLAY_CHART ; i++ ) {
 						if ( dbAdapter.checkExistsData((mYear-i), mMonth, intentKindParam) > 0 ) {
 							// DB 에 있다면 읽어온다.
 							addXYSeries(dbAdapter.getMonthlyData(mYear-i, mMonth, intentKindParam),String.format("%4d-%02d", mYear-i, mMonth),0);
 						} else {
 							// 서버에서 가져온다.
+							client = new HttpClientForParkrio("monthly");
 							postParams = "__VIEWSTATE="
-									+ URLEncoder.encode(PARAM_VIEWSTATE, SERVER_CHARSET)
+									+ URLEncoder.encode(client.paramViewState, client.SERVER_CHARSET)
 									+ "&selYear=" + (mYear-i) + "&selMonth=" + mMonth
 									+ "&sKind=" + intentKindParam.toUpperCase();
 							Log.i("url", postParams);
 							
-							client = new HttpClientForParkrio();
 							htmlBody = client.fetch(url, cookieString, postParams);
 							
 							// get values from htmlBody;
@@ -349,7 +343,7 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 							
 							if ( mYear-i != cal.get(Calendar.YEAR)) {
 								// 현재 달의 값은 DB 에 저장하지 않는다. 계속 변하고 있기 때문에...
-								dbAdapter.setMonthlyData(mYear-i, mMonth, intentKindParam, parseMonthlyDataFromHtml(htmlBody));
+								dbAdapter.setMonthlyData(mYear-i, mMonth, intentKindParam, HttpClientForParkrio.parseMonthlyDataFromHtml(htmlBody));
 							}
 						}
 						if ( chartType.equals("barChart") )
@@ -357,8 +351,8 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 					}
 				} else {
 					// if no-cookie then debug mode
-					addXYSeries(readAsset(getApplicationContext(), SERVER_URI),String.format("%4d-%2d", mYear, mMonth),0);
-					addXYSeries(readAsset(getApplicationContext(), SERVER_URI2),String.format("%4d-%2d", mYear-1, mMonth),0);
+					addXYSeries(HttpClientForParkrio.readParkrioAsset(getApplicationContext(), SERVER_URI),String.format("%4d-%2d", mYear, mMonth),0);
+					addXYSeries(HttpClientForParkrio.readParkrioAsset(getApplicationContext(), SERVER_URI2),String.format("%4d-%2d", mYear-1, mMonth),0);
 				}
 
 			} catch (LogoutException e) {
@@ -507,6 +501,7 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 		r.setGradientStop(maxYValue * 0.8, (Integer) kindInfo.get("barColor"));
 
 		// for LOG
+		Log.i("CountOfDataSet",Integer.toString(dataset.getSeriesCount()));
 		for ( int j =0 ; j < dataset.getSeriesCount() ; j++) {
 			XYSeries temp = dataset.getSeriesAt(j);
 			Log.i("title",temp.getTitle());
@@ -571,6 +566,7 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 		r.setChartValuesSpacing(2);
 		
 		// for LOG
+		Log.i("CountOfDataSet",Integer.toString(dataset.getSeriesCount()));
 		for ( int j =0 ; j < dataset.getSeriesCount() ; j++) {
 			XYSeries temp = dataset.getSeriesAt(j);
 			Log.i("title",temp.getTitle());
@@ -662,39 +658,9 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 
 	private void addXYSeries (String html, String title, int scale) throws Exception {
 		List<Double> valueList = new ArrayList<Double>();
-		List<Date> date = new ArrayList<Date>();
 
-		Source source = new Source(html);
-		source.fullSequentialParse();
-
-		Element outerTable = source.getAllElements(HTMLElementName.TABLE)
-				.get(1).getAllElements(HTMLElementName.TABLE).get(0);
-
-		Element outerTd = outerTable.getAllElements(HTMLElementName.TR).get(0)
-				.getAllElements(HTMLElementName.TD).get(1);
-		Element innerTable = outerTd.getAllElements(HTMLElementName.TABLE).get(
-				0);
-		List innerTd = innerTable.getAllElements(HTMLElementName.TR).get(1)
-				.getAllElements(HTMLElementName.TD);
-
-		Iterator tdIter = innerTd.iterator();
-
-		tdIter.next(); // skip empty td
-
-		while (tdIter.hasNext()) {
-
-			Element td = (Element) tdIter.next();
-			if (td.getChildElements().size() > 0) {
-				Element dataTable = td.getAllElements(HTMLElementName.TABLE).get(0);
-				String temp = dataTable.getAttributeValue("onmouseover");
-				Pattern p = Pattern.compile("[0-9.]+");
-				Matcher mc = p.matcher(temp);
-				if (mc.find()) {
-					valueList.add(Double.parseDouble(mc.group(0)));
-				}
-			}
-		}
-
+		valueList = HttpClientForParkrio.parseMonthlyDataFromHtml(html);
+		
 		if ( valueList.size() > maxXValue ) {
 			maxXValue = valueList.size();
 		}
@@ -706,50 +672,10 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 			}
 		}
 		
-
 		dataset.addSeries(series);
 
 	}
 	
-	private List<Double> parseMonthlyDataFromHtml (String html) throws Exception {
-		List<Double> valueList = new ArrayList<Double>();
-		List<Date> date = new ArrayList<Date>();
-
-		Source source = new Source(html);
-		source.fullSequentialParse();
-
-		Element outerTable = source.getAllElements(HTMLElementName.TABLE)
-				.get(1).getAllElements(HTMLElementName.TABLE).get(0);
-
-		Element outerTd = outerTable.getAllElements(HTMLElementName.TR).get(0)
-				.getAllElements(HTMLElementName.TD).get(1);
-		Element innerTable = outerTd.getAllElements(HTMLElementName.TABLE).get(
-				0);
-		List innerTd = innerTable.getAllElements(HTMLElementName.TR).get(1)
-				.getAllElements(HTMLElementName.TD);
-
-		Iterator tdIter = innerTd.iterator();
-
-		tdIter.next(); // skip empty td
-
-		while (tdIter.hasNext()) {
-
-			Element td = (Element) tdIter.next();
-			if (td.getChildElements().size() > 0) {
-				Element dataTable = td.getAllElements(HTMLElementName.TABLE).get(0);
-				String temp = dataTable.getAttributeValue("onmouseover");
-				Pattern p = Pattern.compile("[0-9.]+");
-				Matcher mc = p.matcher(temp);
-				if (mc.find()) {
-					valueList.add(Double.parseDouble(mc.group(0)));
-				}
-			}
-		}
-		
-		return valueList;
-	}
-	
-
 	public boolean onDown(MotionEvent arg0) {
 		// TODO Auto-generated method stub
 		return false;

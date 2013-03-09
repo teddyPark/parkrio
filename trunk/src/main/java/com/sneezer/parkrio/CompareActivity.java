@@ -150,6 +150,7 @@ public class CompareActivity extends AbstractAsyncActivity {
 		protected String doInBackground(String... params) {
 			// TODO Auto-generated method stub
 			String html = new String();
+			String postParams = new String();
 
 			try { 
 				URL url = new URL(serverHostName+"/hwork/iframe_DayValue.aspx");
@@ -158,37 +159,39 @@ public class CompareActivity extends AbstractAsyncActivity {
 				java.util.Date today = format.parse(params[0]);
 				// 금일 검침 데이터 가져오기
 				//Date today = new java.util.Date();
+				HttpClientForParkrio client = new HttpClientForParkrio("dayly");
 				String dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(today);
-				String postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + "&txtFDate=" + dateString;
-				HttpClientForParkrio client = new HttpClientForParkrio();
-				//htmls.put("today", client.fetch(url, cookieString, postParams));
+				postParams = "__VIEWSTATE="
+						+ URLEncoder.encode(client.paramViewState, client.SERVER_CHARSET)
+						+ "&txtFDate=" + dateString;
+				Log.i("url", postParams);
 				resultMap.put("today", client.fetch(url, cookieString, postParams));
 	
 			    // 전일 검침 데이터 가져오기
+				client = new HttpClientForParkrio("dayly");
 				dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(today.getTime()-(long)86400*1000);
-				Log.i("date",dateString);
-				postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + "&txtFDate=" + dateString;
+				postParams = "__VIEWSTATE="
+						+ URLEncoder.encode(client.paramViewState, client.SERVER_CHARSET)
+						+ "&txtFDate=" + dateString;
 				Log.i("params",postParams);
-				client = new HttpClientForParkrio();
-				//htmls.put("yesterday", client.fetch(url, cookieString, postParams));
 				resultMap.put("yesterday", client.fetch(url, cookieString, postParams));
 
 				// 금월 1일 데이터 가져오기
+				client = new HttpClientForParkrio("dayly");
 				dateString = new java.text.SimpleDateFormat("yyyy-MM-01").format(today.getTime());
-				Log.i("date",dateString);
-				postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + "&txtFDate=" + dateString;
+				postParams = "__VIEWSTATE="
+						+ URLEncoder.encode(client.paramViewState, client.SERVER_CHARSET)
+						+ "&txtFDate=" + dateString;
 				Log.i("params",postParams);
-				client = new HttpClientForParkrio();
-				//htmls.put("thismonth_firstday", client.fetch(url, cookieString, postParams));
 				resultMap.put("thismonth_firstday", client.fetch(url, cookieString, postParams));
 				
 				// 전월 1일 데이터 가져오기
+				client = new HttpClientForParkrio("dayly");
 				dateString = new java.text.SimpleDateFormat("yyyy-MM-01").format(today.getTime()-(long)86400*30*1000);
-				Log.i("date",dateString);
-				postParams = "__VIEWSTATE="+URLEncoder.encode(viewstateParam,serverCharset) + "&txtFDate=" + dateString;
+				postParams = "__VIEWSTATE="
+						+ URLEncoder.encode(client.paramViewState, client.SERVER_CHARSET)
+						+ "&txtFDate=" + dateString;
 				Log.i("params",postParams);
-				client = new HttpClientForParkrio();
-				//htmls.put("lastmonth_firstday", client.fetch(url, cookieString, postParams));
 				resultMap.put("lastmonth_firstday", client.fetch(url, cookieString, postParams));
 
 			} catch (LogoutException e) {

@@ -64,7 +64,7 @@ public class MeasurementDBAdapter {
 			// create yearly data table
 			StringBuilder query = new StringBuilder();
 			
-			query.append("create table "+ TABLE_YEARLY + " (");
+			query.append("create table if not exists "+ TABLE_YEARLY + " (");
 			query.append(		"Id INTEGER PRIMARY KEY AUTOINCREMENT, ");
 			query.append(		"Year INTEGER, "); 
 			query.append(		"Kind TEXT "); 
@@ -72,20 +72,21 @@ public class MeasurementDBAdapter {
 				query.append("," + month + " " + FIELDTYPE_MONTH);
 			}
 			query.append(");");
-	
+
 			try {
 				Log.i("DB_createTable",query.toString());
 				db.execSQL(query.toString());
 			} catch (Exception e) {
 				Log.e("DB", "can't create table "+TABLE_YEARLY);
+				e.printStackTrace();
 			}
 	
-			db.endTransaction();
+			//db.endTransaction();
 			
 			query.delete(0, query.length());
 			
 			// create monthly data table
-			query.append("create table "+ TABLE_MONTHLY +" (");
+			query.append("create table if not exists "+ TABLE_MONTHLY +" (");
 			query.append(		"Id INTEGER PRIMARY KEY AUTOINCREMENT, " );
 			query.append(		"Year INTEGER, " );
 			query.append(		"Month INTEGER, " );
@@ -102,7 +103,7 @@ public class MeasurementDBAdapter {
 				Log.e("DB", "can't create table "+TABLE_MONTHLY);
 				e.printStackTrace();
 			}
-	
+
 		}
 	
 		@Override
@@ -125,13 +126,14 @@ public class MeasurementDBAdapter {
 			qryValues.put(monthList[i],values.get(index));
 			index++;
 		}
+		Log.i("Qry_insertYearData",qryValues.toString());
 		mDb.insert(TABLE_YEARLY, null, qryValues);
 	}
 	
 	public List<Double> getYearlyData (int year, String kind) {
 		List<Double> resultSet = new ArrayList<Double>();
 		
-		String selectQry = "SELECT * FROM " + TABLE_YEARLY + " AND Kind='" + kind + "';";
+		String selectQry = "SELECT * FROM " + TABLE_YEARLY + " WHERE year=" + year + " AND Kind='" + kind + "';";
 		Cursor cursor = mDb.rawQuery(selectQry, null);
 		
 		if (cursor.moveToFirst()) {
@@ -143,7 +145,7 @@ public class MeasurementDBAdapter {
 			} while (cursor.moveToNext());
 			
 		}
-		
+		cursor.close();
 		return resultSet;
 	}
 	
@@ -179,6 +181,7 @@ public class MeasurementDBAdapter {
 			qryValues.put(dayList[i],values.get(index));
 			index++;
 		}
+		Log.i("Qry_insertMonthData",qryValues.toString());
 		mDb.insert(TABLE_MONTHLY, null, qryValues);
 	}
 	
