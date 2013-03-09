@@ -17,6 +17,15 @@
 package com.sneezer.parkrio;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.Source;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -115,34 +124,6 @@ public abstract class AbstractAsyncActivity extends Activity {
 		startActivity(startIntent);
 		finish();		
 		return true;
-	}
-
-	public String readAsset(Context context, String filename) {
-		AssetManager am = context.getResources().getAssets();
-		InputStream is = null;
-		String result = null;
-		try {
-			is = am.open(filename);
-			int size = is.available();
-
-			if (size > 0) {
-				byte[] data = new byte[size];
-				is.read(data);
-				result = new String(data);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (is != null) {
-				try {
-					is.close();
-					is = null;
-				} catch (Exception e) {
-				}
-			}
-		}
-		am = null;
-		return result;
 	}
 	
 }

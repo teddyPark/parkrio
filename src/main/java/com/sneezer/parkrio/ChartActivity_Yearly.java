@@ -60,17 +60,17 @@ import net.htmlparser.jericho.Source;
 
 public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGestureListener {
 	private final static String DEFAULT_CHART = "lineChart"; 
-	private final static String PARAM_VIEWSTATE = "/wEPDwUKMjAyNzU3OTkxM2RkMXAfR6Im5D2lQRtlQ01g4/icE7k=";
-	private final static String SERVER_CHARSET = "EUC-KR";
+	private final static int COUNT_DISPLAY_CHART = 2; 
 	private final static String SERVER_URI = "/hwork/iframe_YearGraph.aspx";
 	private final static String SERVER_URI2 = "/hwork/iframe_YearGraph2.aspx";
 	private final static int DATE_DIALOG_ID = 0;
-	private final static String TAG = "chartActivity";
+	private final static String TAG = "YearChartActivity";
 	
 	private CookieManager cookieManager;
 	private SharedPreferences preferences;
 	private String cookieString;
 	private String serverHostName;
+	private MeasurementDBAdapter dbAdapter;
 
 	private String intentKindParam;
 	private String intentDateParam;
@@ -88,6 +88,13 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 
 	Map<String, Object> resultMap = new HashMap<String, Object>();
+
+	private static final int[] chartColorSet = new int[] { Color.RED, Color.BLUE, Color.MAGENTA, Color.GREEN };
+	private static final PointStyle[] chartPointStyleSet = new PointStyle[] { PointStyle.CIRCLE, PointStyle.DIAMOND, PointStyle.TRIANGLE, PointStyle.SQUARE };
+
+	private double maxYValue = 0.0; 
+	private int maxXValue = 0;
+	private XYMultipleSeriesDataset dataset;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -179,6 +186,9 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 					}
 				});
 		
+		dbAdapter = new MeasurementDBAdapter(this);
+		dbAdapter.open();
+		
 		ges = new GestureDetector(this);
 		
 		new FetchDailyDataTask().execute(intentKindParam, intentDateParam);
@@ -210,6 +220,9 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 		Intent receivedIntent = getIntent();
 		chartType = preferences.getString("chartType", DEFAULT_CHART);
 
+		dbAdapter = new MeasurementDBAdapter(getApplicationContext());
+		dbAdapter.open();
+		
 		new FetchDailyDataTask().execute(intentKindParam, intentDateParam);
 		super.onNewIntent(newIntent);
 	}
@@ -272,46 +285,55 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 		@Override
 		protected String doInBackground(String... params) {
 			// TODO Auto-generated method stub
-			
-
+			dataset = new XYMultipleSeriesDataset();
 			
 			try {
-				
 				URL url = new URL(getString(R.string.base_url) + SERVER_URI);
-
-				resultMap.put("kind", params[0]);
-				resultMap.put("date", String.format("%4d-%2d-%2d", mYear, mMonth, mDay));
+				
 				if (cookieString != null) {
 					Log.i("cookie", cookieString);
-					String postParams = "__VIEWSTATE="
-							+ URLEncoder.encode(PARAM_VIEWSTATE, SERVER_CHARSET)
-							+ "&selYear=" + mYear + "&selMonth=" + mMonth
-							+ "&sKind=" + intentKindParam.toUpperCase();
-					HttpClientForParkrio client = new HttpClientForParkrio();
-					resultMap.put("html", client.fetch(url, cookieString, postParams));
-					Log.i("url", postParams);
-
- 
-						postParams = "__VIEWSTATE="
-								+ URLEncoder.encode(PARAM_VIEWSTATE, SERVER_CHARSET)
-								+ "&selYear=" + (mYear-1) + "&selMonth=" + mMonth
-								+ "&sKind=" + intentKindParam.toUpperCase();
-						client = new HttpClientForParkrio();
-						resultMap.put("lastyear", client.fetch(url, cookieString, postParams));
-						Log.i("url", postParams);
+				
+					String postParams = new String();
+					String htmlBody = new String();
+					HttpClientForParkrio client;
+					
+					// 과거 데이터 DB insert
+					Calendar cal = Calendar.getInstance();
+					for ( int i=0 ; i < COUNT_DISPLAY_CHART ; i++ ) {
+						if ( dbAdapter.checkExistsData((mYear-i), intentKindParam) > 0 ) {
+							// DB 에 있다면 읽어온다.
+							addXYSeries(dbAdapter.getYearlyData(mYear-i, intentKindParam),String.format("%4d", mYear-i),0);
+						} else {
+							// 서버에서 가져온다.
+							client = new HttpClientForParkrio("yearly");
+							postParams = "__VIEWSTATE="
+									+ URLEncoder.encode(client.paramViewState, client.SERVER_CHARSET)
+									+ "&selYear=" + (mYear-i) + "&selMonth=" + mMonth
+									+ "&sKind=" + intentKindParam.toUpperCase();
+							Log.i("url", postParams);
+							
+							htmlBody = client.fetch(url, cookieString, postParams);
+							
+							// get values from htmlBody;
+							addXYSeries(htmlBody,String.format("%4d", mYear-i),0);
+							
+							if ( mYear-i != cal.get(Calendar.YEAR)) {
+								// 현재 달의 값은 DB 에 저장하지 않는다. 계속 변하고 있기 때문에...
+								dbAdapter.setYearlyData(mYear-i, intentKindParam, HttpClientForParkrio.parseYearlyDataFromHtml(htmlBody));
+							}
+						}
+						if ( chartType.equals("barChart") )
+							break;
+					}
 				} else {
 					// if no-cookie then debug mode
-					resultMap.put("html", readAsset(getApplicationContext(), SERVER_URI));
-					resultMap.put("lastyear", readAsset(getApplicationContext(), SERVER_URI2));
+					addXYSeries(HttpClientForParkrio.readParkrioAsset(getApplicationContext(), SERVER_URI),String.format("%4d", mYear),0);
+					addXYSeries(HttpClientForParkrio.readParkrioAsset(getApplicationContext(), SERVER_URI2),String.format("%4d", mYear-1),0);
 				}
 
 			} catch (LogoutException e) {
-				resultMap.put("html","");
-				resultMap.put("lastyear","");
 				return "LOGOUT";
 			} catch (Exception e) {
-				resultMap.put("html","");
-				resultMap.put("lastyear","");
 				e.printStackTrace();
 				return "EXCEPTION";
 			}
@@ -321,6 +343,7 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 		@Override
 		protected void onPostExecute(String resultStr) {
 			dismissProgressDialog();
+			dbAdapter.close();
 			if (resultStr == "LOGOUT") {
 				Toast.makeText(getApplicationContext(), "로그아웃되었습니다. 재로그인 해 주세요.", Toast.LENGTH_SHORT).show();
 				logout();
@@ -406,119 +429,22 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 		return result;
 	}
 
-	private void drawBarChartOld() throws Exception {
-		XYMultipleSeriesRenderer renderer = new XYMultipleSeriesRenderer();
-
-		List<Double> parseValue = parseYearlyValuePage(resultMap.get("html").toString());
-		Map kindInfo = getKindInfo(intentKindParam);
-
-		renderer.setChartTitle(Integer.toString(mYear) + "년 "+  kindInfo.get("title").toString());
-		renderer.setChartTitleTextSize(30);
-		// set margin (top,left,bottom,right
-		renderer.setMargins(new int[] { 40, 25, 15, 15 });
-		renderer.setMarginsColor(Color.parseColor("#E4E4E4"));
-
-		String[] titles = new String[] { kindInfo.get("name").toString() };
-		int[] colors = new int[] { (Integer) kindInfo.get("barColor") };
-
-		renderer.setLegendTextSize(15);
-		int length = colors.length;
-
-		for (int i = 0; i < length; i++) {
-			SimpleSeriesRenderer r = new SimpleSeriesRenderer();
-			r.setColor(colors[i]);
-			renderer.addSeriesRenderer(r);
-		}
-
-		renderer.setXTitle("날짜");
-		renderer.setYTitle(kindInfo.get("unit").toString());
-		renderer.setAxisTitleTextSize(20);
-		renderer.setBarSpacing(0.1);
-
-		renderer.setLabelsTextSize(18);
-		renderer.setXAxisMin(0.5);
-		renderer.setXAxisMax(parseValue.size() + 1);
-		renderer.setYAxisMin(0);
-
-		double maxValue = 0.0;
-		for (int i = 0; i < parseValue.size(); i++) {
-			if (maxValue < parseValue.get(i))
-				maxValue = parseValue.get(i);
-		}
-		renderer.setYAxisMax(maxValue * 1.2);
-
-		renderer.setAxesColor(Color.BLACK);
-		renderer.setLabelsColor(Color.BLACK);
-
-		renderer.setXLabelsAlign(Align.CENTER);
-		renderer.setYLabelsAlign(Align.RIGHT);
-		renderer.setShowGrid(true);
-		renderer.setGridColor(Color.parseColor("#c9c9c9"));
-		renderer.setPanEnabled(false, false);
-		renderer.setZoomEnabled(true, true);
-
-		XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
-		for (int i = 0; i < titles.length; i++) {
-			CategorySeries series = new CategorySeries(titles[i]);
-			XYSeries dataSeries = new XYSeries(Integer.toString(mYear) + "/"
-					+ Integer.toString(mMonth));
-			for (int j = 0; j < parseValue.size(); j++) {
-				series.add(Integer.toString(j + 1), parseValue.get(j));
-				dataSeries.add(j + 1, parseValue.get(j));
-			}
-			dataset.addSeries(dataSeries);
-		}
-		SimpleSeriesRenderer r = renderer.getSeriesRendererAt(0);
-
-		// 챠트 value 표시 설정
-		r.setDisplayChartValues(true);
-		r.setChartValuesTextSize(9);
-		r.setChartValuesSpacing(2);
-
-		// 그라데이션 설정
-		r.setGradientEnabled(true);
-		r.setGradientStart(0, Color.parseColor("#ffffff"));
-		r.setGradientStop(maxValue * 0.8, (Integer) kindInfo.get("barColor"));
-
-		// 그래프 객체 생성
-		GraphicalView gv = ChartFactory.getBarChartView(
-				getApplicationContext(), dataset, renderer, Type.STACKED);
-		// 그래프를 LinearLayout에 추가
-		LinearLayout llBody = (LinearLayout) findViewById(R.id.chart_area);
-		llBody.removeAllViewsInLayout();
-		llBody.addView(gv);
-	}
-
 	private void drawBarChart() throws Exception {
 		
-		List<Double> parseValue = parseYearlyValuePage(resultMap.get("html").toString());
 		Map kindInfo = getKindInfo(intentKindParam);
 
-		String[] titles = new String[] { Integer.toString(mYear) };
-		
-		List<double[]> x = new ArrayList<double[]>();
-	    int[] colors = new int[] { (Integer) kindInfo.get("barColor") };
-	    PointStyle[] styles = new PointStyle[] { PointStyle.CIRCLE};
-	    
-	    List<double[]> values = new ArrayList<double[]>();
-	    
-	    double[] value = new double[parseValue.size()];
-	    double[] date = new double[parseValue.size()];
-		for (int i = 0; i < parseValue.size(); i++) {
-			value[i] = parseValue.get(i);
-			date[i] = i+1;
+		int [] colors = new int[dataset.getSeriesCount()];
+		PointStyle[] styles = new PointStyle[dataset.getSeriesCount()];
+		for ( int j =0 ; j < dataset.getSeriesCount() ; j++) {
+			colors[j] = chartColorSet[j];
+			styles[j] = chartPointStyleSet[j];
 		}
-		values.add(value);
-	    for (int i = 0; i < titles.length; i++) {
-	    	x.add(date);
-	    }
-	    int color[] = new int[] {Color.BLUE};
-	    
+		
 	    XYMultipleSeriesRenderer renderer = buildRenderer(colors, styles);
 	    renderer.setChartTitle(Integer.toString(mYear) + "년 "
 	    		+ kindInfo.get("title").toString());
 	    renderer.setChartTitleTextSize(30);
-	    // set margin (top,left,bottom,right
+	    // set margin (top,left,bottom,right)
 	    renderer.setMargins(new int[] { 40, 25, 15, 15 });
 	    renderer.setMarginsColor(Color.parseColor("#E4E4E4"));
 	    renderer.setLegendTextSize(15);
@@ -528,20 +454,13 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 	      ((XYSeriesRenderer) renderer.getSeriesRendererAt(i)).setFillPoints(true);
 	    }
 	    
-	    double maxValue = 0.0;
-		for (int i = 0; i < parseValue.size(); i++) {
-			if (maxValue < parseValue.get(i))
-				maxValue = parseValue.get(i);
-		}
-		renderer.setYAxisMax(maxValue * 1.2);
-		renderer.setXTitle("월");
+		renderer.setXTitle("날짜");
 		renderer.setYTitle(kindInfo.get("unit").toString());
 		renderer.setAxisTitleTextSize(20);
 		renderer.setBarSpacing(0.1);
 
 		renderer.setLabelsTextSize(18);
 		renderer.setXAxisMin(0);
-		renderer.setXAxisMax(parseValue.size() + 1);
 		renderer.setYAxisMin(0);
 	    
 		SimpleSeriesRenderer r = renderer.getSeriesRendererAt(0);
@@ -554,56 +473,45 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 		// 그라데이션 설정
 		r.setGradientEnabled(true);
 		r.setGradientStart(0, Color.parseColor("#ffffff"));
-		r.setGradientStop(maxValue * 0.8, (Integer) kindInfo.get("barColor"));
+		r.setGradientStop(maxYValue * 0.8, (Integer) kindInfo.get("barColor"));
 
+		// for LOG
+		Log.i("CountOfDataSet",Integer.toString(dataset.getSeriesCount()));
+		for ( int j =0 ; j < dataset.getSeriesCount() ; j++) {
+			XYSeries temp = dataset.getSeriesAt(j);
+			Log.i("title",temp.getTitle());
+			Log.i("scale",Integer.toString(temp.getScaleNumber()));
+			StringBuilder sb = new StringBuilder();
+			for ( int i=0;i< temp.getItemCount() ;i++) {
+				sb.append(Double.toString(temp.getX(i))+"="+Double.toString(temp.getY(i))+", ");
+			}
+			Log.i("XY value",sb.toString());
+		}
+		
 		// 그래프 객체 생성
-		GraphicalView gv = ChartFactory.getBarChartView(ChartActivity_Yearly.this, buildDataset(titles, x, values), renderer, Type.STACKED);
+		GraphicalView gv = ChartFactory.getBarChartView(ChartActivity_Yearly.this, dataset, renderer, Type.STACKED);
 		// 그래프를 LinearLayout에 추가
 		LinearLayout llBody = (LinearLayout) findViewById(R.id.chart_area);
 		llBody.removeAllViewsInLayout();
 		llBody.addView(gv);
 	}
-	
 	private void drawLineChart() throws Exception {
 
-		List<Double> parseValue_current = parseYearlyValuePage(resultMap.get("html").toString());
-		List<Double> parseValue_lastyear = parseYearlyValuePage(resultMap.get("lastyear").toString());
 		Map kindInfo = getKindInfo(intentKindParam);
 
-		String[] titles = new String[] { Integer.toString(mYear), Integer.toString(mYear-1) };
-
-		// set x 축 title
-		List<double[]> x = new ArrayList<double[]>();
-	    int[] colors = new int[] { (Integer) kindInfo.get("barColor"), Color.RED };
-
-	    List<double[]> values = new ArrayList<double[]>();
-	    
-	    double[] date = new double[parseValue_current.size()];
-	    double[] value = new double[parseValue_current.size()];
-
-		for (int i = 0; i < parseValue_current.size(); i++) {
-			value[i] = parseValue_current.get(i);
-			date[i] = i+1;
+		int [] colors = new int[dataset.getSeriesCount()];
+		PointStyle[] styles = new PointStyle[dataset.getSeriesCount()];
+		for ( int j =0 ; j < dataset.getSeriesCount() ; j++) {
+			colors[j] = chartColorSet[j];
+			styles[j] = chartPointStyleSet[j];
 		}
-		values.add(value);
-		for (int i = 0; i < titles.length; i++) {
-			x.add(date);
-		}
-		
-		value = new double[parseValue_lastyear.size()];
-		for (int i = 0; i < parseValue_lastyear.size(); i++) {
-			value[i] = parseValue_lastyear.get(i);
-		}
-		values.add(value);
 
-	    PointStyle[] styles = new PointStyle[] { PointStyle.CIRCLE, PointStyle.DIAMOND };
-	    
 	    XYMultipleSeriesRenderer renderer = buildRenderer(colors, styles);
 	    renderer.setChartTitle(Integer.toString(mYear) + "년 "
 	    		+ kindInfo.get("title").toString());
 	    renderer.setChartTitleTextSize(30);
-	    // set margin (top,left,bottom,right
-	    renderer.setMargins(new int[] { 40, 40, 40, 15 });
+	    // set margin (top,left,bottom,right)
+	    renderer.setMargins(new int[] { 40, 30, 40, 15 });
 	    renderer.setMarginsColor(Color.parseColor("#E4E4E4"));
 	    renderer.setLegendTextSize(15);
 	    renderer.setChartTitleTextSize(30);
@@ -613,25 +521,14 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 	      ((XYSeriesRenderer) renderer.getSeriesRendererAt(i)).setFillPoints(true);
 	    }
 	    
-	    double maxValue = 0.0;
-		for (int i = 0; i < parseValue_current.size(); i++) {
-			if (maxValue < parseValue_current.get(i))
-				maxValue = parseValue_current.get(i);
-		}
-		for (int i = 0; i < parseValue_lastyear.size(); i++) {
-			if (maxValue < parseValue_lastyear.get(i))
-				maxValue = parseValue_lastyear.get(i);
-		}
-
-		renderer.setYAxisMax(maxValue * 1.2);
-		renderer.setXTitle("월");
+		renderer.setXTitle("날짜");
 		renderer.setYTitle(kindInfo.get("unit").toString());
 		renderer.setAxisTitleTextSize(28);
+		renderer.setShowAxes(true);		
 		renderer.setBarSpacing(0.1);
 
 		renderer.setLabelsTextSize(23);
-		renderer.setXAxisMin(0);
-		renderer.setXAxisMax(parseValue_current.size() + 1);
+		renderer.setXAxisMin(0.5);
 		renderer.setYAxisMin(0);
 
 		SimpleSeriesRenderer r = renderer.getSeriesRendererAt(0);
@@ -641,14 +538,26 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 		r.setChartValuesTextSize(9);
 		r.setChartValuesSpacing(2);
 		
+		// for LOG
+		Log.i("CountOfDataSet",Integer.toString(dataset.getSeriesCount()));
+		for ( int j =0 ; j < dataset.getSeriesCount() ; j++) {
+			XYSeries temp = dataset.getSeriesAt(j);
+			Log.i("title",temp.getTitle());
+			Log.i("scale",Integer.toString(temp.getScaleNumber()));
+			StringBuilder sb = new StringBuilder();
+			for ( int i=0;i< temp.getItemCount() ;i++) {
+				sb.append(Double.toString(temp.getX(i))+"="+Double.toString(temp.getY(i))+", ");
+			}
+			Log.i("XY value",sb.toString());
+		}
 		// 그래프 객체 생성
-		GraphicalView gv = ChartFactory.getLineChartView(getApplicationContext(), buildDataset(titles, x, values), renderer);
+		GraphicalView gv = ChartFactory.getLineChartView(ChartActivity_Yearly.this, dataset, renderer);
 		// 그래프를 LinearLayout에 추가
 		LinearLayout llBody = (LinearLayout) findViewById(R.id.chart_area);
 		llBody.removeAllViewsInLayout();
 		llBody.addView(gv);
 	}
-
+	
 	protected XYMultipleSeriesRenderer buildRenderer(int[] colors, PointStyle[] styles) {
 		XYMultipleSeriesRenderer renderer = new XYMultipleSeriesRenderer();
 		setRenderer(renderer, colors, styles);
@@ -661,7 +570,7 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 		renderer.setLabelsTextSize(18);
 		renderer.setLegendTextSize(15);
 		renderer.setPointSize(3f);
-		renderer.setMargins(new int[] { 40, 35, 15, 15 });
+		renderer.setMargins(new int[] { 40, 25, 15, 15 });
 		int length = colors.length;
 		for (int i = 0; i < length; i++) {
 			XYSeriesRenderer r = new XYSeriesRenderer();
@@ -676,30 +585,23 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 		renderer.setYLabelsAlign(Align.RIGHT);
 		renderer.setYLabelsColor(0,Color.BLACK);
 		renderer.setShowGrid(true);
+		renderer.setShowGridX(true);
+		renderer.setShowLegend(true);
+		renderer.setAntialiasing(true);
 		renderer.setGridColor(Color.parseColor("#c9c9c9"));
 		renderer.setPanEnabled(false, false);
 		renderer.setZoomEnabled(true, true);
+		renderer.setXAxisMax(maxXValue + 1);
+		renderer.setYAxisMax(maxYValue * 1.2);
 	}
 	
-	protected XYMultipleSeriesDataset buildDataset(String[] titles,
-			List<double[]> xValues, List<double[]> yValues) {
+	protected XYMultipleSeriesDataset buildDataset(String[] titles, List<double[]> xValues, List<double[]> yValues) {
 		XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
 		addXYSeries(dataset, titles, xValues, yValues, 0);
-
-		for ( int j =0 ; j < dataset.getSeriesCount() ; j++) {
-			XYSeries temp = dataset.getSeriesAt(j);
-			Log.i("title",temp.getTitle());
-			Log.i("scale",Integer.toString(temp.getScaleNumber()));
-			for ( int i=0;i< 12 ;i++) {
-				Log.i(Double.toString(temp.getX(i)),Double.toString(temp.getY(i)));
-			}
-		}
-		
 		return dataset;
 	}
 
-	public void addXYSeries(XYMultipleSeriesDataset dataset, String[] titles,
-			List<double[]> xValues, List<double[]> yValues, int scale) {
+	public void addXYSeries(XYMultipleSeriesDataset dataset, String[] titles, List<double[]> xValues, List<double[]> yValues, int scale) {
 		int length = titles.length;
 		for (int i = 0; i < length; i++) {
 			XYSeries series = new XYSeries(titles[i], scale);
@@ -713,44 +615,36 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 		}
 	}
 	
-	private List<Double> parseYearlyValuePage(String dayValue) throws Exception {
-		List<Double> resultSet = new ArrayList<Double>();
-		List<Date> date = new ArrayList<Date>();
+	public void addXYSeries (List<Double> valueList, String title, int scale ) throws Exception {
+		XYSeries series = new XYSeries(title, scale);
+		if ( valueList.size() > maxXValue ) {
+			maxXValue = valueList.size();
+		}
+		for (int i = 0; i < valueList.size(); i++) {
+			series.add((double)i+1,valueList.get(i));
+			if (valueList.get(i) > maxYValue) {
+				maxYValue = valueList.get(i);
+			}
+		}
+		dataset.addSeries(series);		
+	}
+	
+	private void addXYSeries (String html, String title, int scale) throws Exception {
+		List<Double> valueList = new ArrayList<Double>();
 
-		Source source = new Source(dayValue);
-		source.fullSequentialParse();
-
-		Element outerTable = source.getAllElements(HTMLElementName.TABLE)
-				.get(1).getAllElements(HTMLElementName.TABLE).get(0);
-
-		Element outerTd = outerTable.getAllElements(HTMLElementName.TR).get(0)
-				.getAllElements(HTMLElementName.TD).get(1);
-		Element innerTable = outerTd.getAllElements(HTMLElementName.TABLE).get(
-				0);
-		List innerTd = innerTable.getAllElements(HTMLElementName.TR).get(1)
-				.getAllElements(HTMLElementName.TD);
-
-		Iterator tdIter = innerTd.iterator();
-
-		tdIter.next(); // skip empty td
-
-		while (tdIter.hasNext()) {
-
-			Element td = (Element) tdIter.next();
-			if (td.getChildElements().size() > 0) {
-				Element dataTable = td.getAllElements(HTMLElementName.TABLE)
-						.get(0);
-				String temp = dataTable.getAttributeValue("onmouseover");
-				Pattern p = Pattern.compile("[0-9.]+");
-				Matcher mc = p.matcher(temp);
-				if (mc.find()) {
-					resultSet.add(Double.parseDouble(mc.group(0)));
-				}
+		valueList = HttpClientForParkrio.parseYearlyDataFromHtml(html);
+		if ( valueList.size() > maxXValue ) {
+			maxXValue = valueList.size();
+		}
+		XYSeries series = new XYSeries(title, scale);
+		for (int i = 0; i < valueList.size(); i++) {
+			series.add((double)i+1,valueList.get(i));
+			if (valueList.get(i) > maxYValue) {
+				maxYValue = valueList.get(i);
 			}
 		}
 
-		source.clearCache();
-		return resultSet;
+		dataset.addSeries(series);
 	}
 
 	public boolean onDown(MotionEvent arg0) {
