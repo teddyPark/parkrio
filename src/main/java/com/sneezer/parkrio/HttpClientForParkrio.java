@@ -21,33 +21,35 @@ import net.htmlparser.jericho.Source;
 
 public class HttpClientForParkrio {
 
-	private static String userAgentHeader = new String("Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1;; APCPMS=E839.353E.2E0A-win7^N20120502090046254556C65BBCE3E22DEE3F_1981^1^1^2186362890^30282584^2160947136; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; InfoPath.3; .NET4.0C; TCO_20130225130629)");
-	private static String refererHeader = new String("http://211.49.175.211/hwork/iframe_DayValue.aspx");
+	private final static String userAgentHeader = new String("Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1;; APCPMS=E839.353E.2E0A-win7^N20120502090046254556C65BBCE3E22DEE3F_1981^1^1^2186362890^30282584^2160947136; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; InfoPath.3; .NET4.0C; TCO_20130225130629)");
+	private final static String refererHeader = new String("http://211.49.175.211/hwork/iframe_DayValue.aspx");
 	
-	private String TODAY_PARAM_VIEWSTATE = "/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=";
-	private String TODAY_URI = "/hwork/iframe_DayValue.aspx";
-	private String MONTHLY_PARAM_VIEWSTATE = "/wEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4=";
-	private String MONTHLY_URI = "/hwork/iframe_MonthGraph.aspx";
-	private String YEARLY_PARAM_VIEWSTATE = "/wEPDwUKMjAyNzU3OTkxM2RkMXAfR6Im5D2lQRtlQ01g4/icE7k=";
-	private String YEARLY_URI = "/hwork/iframe_YearGraph.aspx";
-	public String SERVER_CHARSET = "EUC-KR";
+	private final static String TODAY_PARAM_VIEWSTATE = "/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=";
+	private final static String TODAY_URI = "/hwork/iframe_DayValue.aspx";
+	private final static String MONTHLY_PARAM_VIEWSTATE = "/wEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4=";
+	private final static String MONTHLY_URI = "/hwork/iframe_MonthGraph.aspx";
+	private final static String YEARLY_PARAM_VIEWSTATE = "/wEPDwUKMjAyNzU3OTkxM2RkMXAfR6Im5D2lQRtlQ01g4/icE7k=";
+	private final static String YEARLY_URI = "/hwork/iframe_YearGraph.aspx";
+	
 	private String html;
 	
+	public String SERVER_CHARSET = "EUC-KR";
 	public String paramViewState;
 	public String uri;
 	
 	public HttpClientForParkrio (String catId) {
 		if ( catId.equals("dayly") ) {
-			paramViewState = TODAY_PARAM_VIEWSTATE;
+			paramViewState=TODAY_PARAM_VIEWSTATE;
 			uri = TODAY_URI;
 		} else if ( catId.equals("monthly")) {
-			paramViewState =MONTHLY_PARAM_VIEWSTATE;
+			paramViewState=MONTHLY_PARAM_VIEWSTATE;
 			uri=MONTHLY_URI;
-		} else if ( catId.equals("yealy")) {
-			paramViewState =YEARLY_PARAM_VIEWSTATE;
+		} else if ( catId.equals("yearly")) {
+			paramViewState=YEARLY_PARAM_VIEWSTATE;
 			uri=YEARLY_URI;
 		}
 	}
+	
 	public String fetch(URL url, String cookieStr, String postParam ) throws Exception {
 
 		HttpURLConnection httpClient = null;
