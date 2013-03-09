@@ -1,12 +1,10 @@
 package com.sneezer.parkrio;
 
 import java.net.URL;
-import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,17 +17,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.util.Log;
 
-import net.htmlparser.jericho.Element;
-import net.htmlparser.jericho.HTMLElementName;
-import net.htmlparser.jericho.Source;
-
 public class CompareActivity extends AbstractAsyncActivity {
 	private final static String TAG = "compareActivity";
 	private CookieManager cookieManager;
 	private String serverHostName;
 	private String cookieString;
+	private String intentDateParam;
+	
+	private MeasurementDBAdapter dbAdapter;
 	
 	Map<String, Object> resultMap = new HashMap<String, Object>();
+	private List<Measurement> amountMeasure = new ArrayList<Measurement>();
+	private List<Measurement> usedMeasure = new ArrayList<Measurement>();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +42,6 @@ public class CompareActivity extends AbstractAsyncActivity {
 		cookieString = cookieManager.getCookie(serverHostName);
 		Log.i("oncreate",cookieManager.getCookie(serverHostName));
 
-		String intentDateParam = new String();
 		if ( getIntent().getStringExtra("date") != null ) {
 			intentDateParam = getIntent().getStringExtra("date");
 		} else {
@@ -51,59 +49,47 @@ public class CompareActivity extends AbstractAsyncActivity {
 		}
 		
 		final String todayString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
-		findViewById(R.id.elect).setOnClickListener(new View.OnClickListener() {
+		findViewById(R.id.elec).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity_Monthly.class);
-				chartIntent.putExtra("type", "elec");
-				chartIntent.putExtra("date",todayString);
-				startActivity(chartIntent);
+				startChartActivity("elec",todayString);
 			}
 		});
 
 		findViewById(R.id.heat).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity_Monthly.class);
-				chartIntent.putExtra("kind", "heat");
-				chartIntent.putExtra("date",todayString);
-				startActivity(chartIntent);
+				startChartActivity("heat",todayString);
 			}
 		});
 
 		findViewById(R.id.hotwater).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity_Monthly.class);
-				chartIntent.putExtra("kind", "hotwater");
-				chartIntent.putExtra("date",todayString);
-				startActivity(chartIntent);
-			}
+				startChartActivity("hotwater",todayString);			}
 		});
 
 		findViewById(R.id.gas).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity_Monthly.class);
-				chartIntent.putExtra("kind", "gas");
-				chartIntent.putExtra("date",todayString);
-				startActivity(chartIntent);
-			}
+				startChartActivity("gas",todayString);			}
 		});
 
 		findViewById(R.id.water).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				Intent chartIntent = new Intent(getApplicationContext(), ChartActivity_Monthly.class);
-				chartIntent.putExtra("kind", "water");
-				chartIntent.putExtra("date",todayString);
-				startActivity(chartIntent);
+				startChartActivity("water",todayString);
 			}
 		});
+		
+		dbAdapter = new MeasurementDBAdapter(this);
+		dbAdapter.open();
 		
 		new FetchDailyDataTask().execute(intentDateParam);
 	}
 	
+	public void startChartActivity ( String kind, String date ) {
+		Intent chartIntent = new Intent(getApplicationContext(), ChartActivity_Monthly.class);
+		chartIntent.putExtra("type", kind);
+		chartIntent.putExtra("date", date);
+		startActivity(chartIntent);
+	}
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -116,13 +102,22 @@ public class CompareActivity extends AbstractAsyncActivity {
 		CookieSyncManager.getInstance().stopSync();
 	}
 	
-	private void setMeasurementText (String columnId, Measurement mesurement) {
+	@Override
+	public void onNewIntent(Intent newIntent) {
+		dbAdapter = new MeasurementDBAdapter(getApplicationContext());
+		dbAdapter.open();
+		
+		new FetchDailyDataTask().execute(intentDateParam);
+		super.onNewIntent(newIntent);
+	}	
+
+	private void setMeasurementText (String columnId, Measurement measure) {
 		Class<R.id> Ids = R.id.class;
 		Resources res = getResources();
-		String[] typeList = new String[] {"Elect", "Gas", "Hotwater", "Water", "Heat"};
-		Map<String,Float> mesu = mesurement.getObject();
+		String[] typeList = new String[] {"Elec", "Gas", "Hotwater", "Water", "Heat"};
+		Map<String,Double> mesu = measure.getObject();
 		
-		if ( mesurement != null ) {
+		if ( measure != null ) {
 			try {
 				for (String type : typeList) {				
 					int resId = res.getIdentifier("com.sneezer.parkrio:id/"+columnId+type, null, null);
@@ -137,8 +132,6 @@ public class CompareActivity extends AbstractAsyncActivity {
 	}
 	
 	private class FetchDailyDataTask extends AsyncTask<String, Void, String> {
-		private final String viewstateParam = "/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=";
-		private final String serverCharset = "EUC-KR";
 			
 		@Override
 		protected void onPreExecute() {
@@ -149,51 +142,47 @@ public class CompareActivity extends AbstractAsyncActivity {
 		@Override
 		protected String doInBackground(String... params) {
 			// TODO Auto-generated method stub
-			String html = new String();
 			String postParams = new String();
 
 			try { 
 				URL url = new URL(serverHostName+"/hwork/iframe_DayValue.aspx");
-				
-				java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd");
+
+		        java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd");
 				java.util.Date today = format.parse(params[0]);
 				// 금일 검침 데이터 가져오기
 				//Date today = new java.util.Date();
-				HttpClientForParkrio client = new HttpClientForParkrio("dayly");
-				String dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(today);
-				postParams = "__VIEWSTATE="
-						+ URLEncoder.encode(client.paramViewState, client.SERVER_CHARSET)
-						+ "&txtFDate=" + dateString;
-				Log.i("url", postParams);
-				resultMap.put("today", client.fetch(url, cookieString, postParams));
-	
-			    // 전일 검침 데이터 가져오기
-				client = new HttpClientForParkrio("dayly");
-				dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(today.getTime()-(long)86400*1000);
-				postParams = "__VIEWSTATE="
-						+ URLEncoder.encode(client.paramViewState, client.SERVER_CHARSET)
-						+ "&txtFDate=" + dateString;
-				Log.i("params",postParams);
-				resultMap.put("yesterday", client.fetch(url, cookieString, postParams));
-
-				// 금월 1일 데이터 가져오기
-				client = new HttpClientForParkrio("dayly");
-				dateString = new java.text.SimpleDateFormat("yyyy-MM-01").format(today.getTime());
-				postParams = "__VIEWSTATE="
-						+ URLEncoder.encode(client.paramViewState, client.SERVER_CHARSET)
-						+ "&txtFDate=" + dateString;
-				Log.i("params",postParams);
-				resultMap.put("thismonth_firstday", client.fetch(url, cookieString, postParams));
 				
-				// 전월 1일 데이터 가져오기
-				client = new HttpClientForParkrio("dayly");
-				dateString = new java.text.SimpleDateFormat("yyyy-MM-01").format(today.getTime()-(long)86400*30*1000);
-				postParams = "__VIEWSTATE="
-						+ URLEncoder.encode(client.paramViewState, client.SERVER_CHARSET)
-						+ "&txtFDate=" + dateString;
-				Log.i("params",postParams);
-				resultMap.put("lastmonth_firstday", client.fetch(url, cookieString, postParams));
-
+				List<String> dateList = new ArrayList<String>();
+				
+				dateList.add(new java.text.SimpleDateFormat("yyyy-MM-dd").format(today));	// 오늘
+				dateList.add(new java.text.SimpleDateFormat("yyyy-MM-dd").format(today.getTime()-(long)86400*1000));	//어제
+				dateList.add(new java.text.SimpleDateFormat("yyyy-MM-01").format(today.getTime()));	// 이번달 1일
+				dateList.add(new java.text.SimpleDateFormat("yyyy-MM-01").format(today.getTime()-(long)86400*30*1000)); // 지난달 1일
+				
+				for ( int i=0; i < dateList.size(); i++) {
+					if ( i > 0 && dbAdapter.checkExistsData(dateList.get(i)) == 2 ) {
+						amountMeasure.add(dbAdapter.getDailyData(dateList.get(i),"amount"));
+						usedMeasure.add(dbAdapter.getDailyData(dateList.get(i),"used"));
+						
+					} else {
+						HttpClientForParkrio client = new HttpClientForParkrio("daily");
+						postParams = "__VIEWSTATE="	+ client.paramViewState	+ "&txtFDate=" + dateList.get(i);
+						Log.i("postParams", postParams);
+						
+						String htmlBody = client.fetch(url, cookieString, postParams);
+						
+						Map<String,Measurement> parseValue = client.parseDayValuePage(htmlBody);
+						
+						// 당일 데이터는 저장하지 않음.
+						if ( i > 0 ) {
+							dbAdapter.setDailyData(dateList.get(i),"amount",parseValue.get("amount"));
+							dbAdapter.setDailyData(dateList.get(i),"used",parseValue.get("used"));
+						}
+						amountMeasure.add(parseValue.get("amount"));
+						usedMeasure.add(parseValue.get("used"));
+					}
+				}
+				
 			} catch (LogoutException e) {
 				return "LOGOUT";
 			} catch (Exception e) {
@@ -215,25 +204,23 @@ public class CompareActivity extends AbstractAsyncActivity {
 			} else {
 				try {
 					// 금일 검침 setText
-					Map <String,Measurement> getData1 = parseDayValuePage(resultMap.get("today").toString());
-					setMeasurementText("today", getData1.get("today"));
+					
+					//Map <String,Measurement> getData1 = parseDayValuePage(resultMap.get("today").toString());
+					setMeasurementText("today", usedMeasure.get(0));
 					
 					// 전일 검침 setText
-					Map <String,Measurement> getData2 = parseDayValuePage(resultMap.get("yesterday").toString());
-					setMeasurementText("yesterday", getData2.get("today"));
+					//Map <String,Measurement> getData2 = parseDayValuePage(resultMap.get("yesterday").toString());
+					setMeasurementText("yesterday", usedMeasure.get(1));
 					
 					// 이번달 검침 setText
-					Map <String,Measurement> getData3 = parseDayValuePage(resultMap.get("thismonth_firstday").toString());
-					Log.i("today",getData3.get("current").toString());
-					Log.i("firstday",getData1.get("current").toString());
-					setMeasurementText("thismonth", getData1.get("current").compare(getData3.get("current")));
+					Measurement baseMeasure1 = amountMeasure.get(2).compare(usedMeasure.get(2));	// 검침 - 사용량 = 해당 날짜 00:00
+					setMeasurementText("thismonth", amountMeasure.get(0).compare(baseMeasure1));
 	
 					// 지난달 검침 setText
-					Map <String,Measurement> getData4 = parseDayValuePage(resultMap.get("lastmonth_firstday").toString());
-					Log.i("today",getData4.get("current").toString());
-					Log.i("firstday",getData3.get("current").toString());
-					setMeasurementText("lastmonth", getData3.get("current").compare(getData4.get("current")));
-					
+					baseMeasure1 = amountMeasure.get(3).compare(usedMeasure.get(3));	// 검침 - 사용량 = 해당 날짜 00:00
+					Measurement baseMeasure2 = amountMeasure.get(2).compare(usedMeasure.get(2));	// 검침 - 사용량 = 해당 날짜 00:00
+					setMeasurementText("lastmonth", baseMeasure2.compare(baseMeasure1));
+				
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -241,69 +228,6 @@ public class CompareActivity extends AbstractAsyncActivity {
 			super.onPostExecute(resultStr);
 		}
 		
-	}
-
-	private Map<String,Measurement> parseDayValuePage(String dayValue) throws Exception {
-		Measurement currentMeasurement = new Measurement();
-		Measurement todayMeasurement = new Measurement();
-		Map<String,Measurement> resultMap = new HashMap<String,Measurement>();
-		
-		Source source = new Source(dayValue);
-		source.fullSequentialParse();
-		
-		Element table = source.getAllElements(HTMLElementName.TABLE).get(0);
-		List trList = table.getAllElements(HTMLElementName.TR);
-		Iterator trIter = trList.iterator();
-		
-		trIter.next();
-		trIter.next();
-		trIter.next();
- 
-		for ( int i = 0 ; i < 5 ; i++ ) {
-			Element tr = (Element) trIter.next();
-			List dataList = tr.getAllElements(HTMLElementName.TD);
-			Iterator tdIter = dataList.iterator();
-			
-			//current total value
-			tdIter.next();
-			tdIter.next();
-			Element data = (Element) tdIter.next();	// third TD
-			float currentValue = Float.parseFloat(data.getContent().getTextExtractor().toString());
-
-			// today use value
-			tdIter.next();
-			data = (Element) tdIter.next();	// fifth TD
-			float todayuseValue = Float.parseFloat(data.getContent().getTextExtractor().toString());
-			
-			if (i == 0) {
-				// 전기
-				currentMeasurement.setElec(currentValue);
-				todayMeasurement.setElec(todayuseValue);
-			} else if ( i == 1 ) {
-				// 수도
-				currentMeasurement.setWater(currentValue);
-				todayMeasurement.setWater(todayuseValue);
-			} else if ( i == 2 ) {
-				// 온수
-				currentMeasurement.setHotwater(currentValue);
-				todayMeasurement.setHotwater(todayuseValue);
-			} else if ( i == 3 ) {
-				// 가스
-				currentMeasurement.setGas(currentValue);
-				todayMeasurement.setGas(todayuseValue);
-			} else if ( i == 4 ) {
-				// 난방
-				currentMeasurement.setHeat(currentValue);
-				todayMeasurement.setHeat(todayuseValue);
-			}
-			 
-			trIter.next();				
-		}
-
-		resultMap.put("current",currentMeasurement);
-		resultMap.put("today",todayMeasurement);
-		source.clearCache();
-		return resultMap;
 	}
 	
 }

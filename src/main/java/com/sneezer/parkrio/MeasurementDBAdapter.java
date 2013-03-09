@@ -19,10 +19,14 @@ public class MeasurementDBAdapter {
 	private final static String DATABASE_NAME = "MEASUREMENT.db";
 	private final static String TABLE_YEARLY = "yearly_data";
 	private final static String TABLE_MONTHLY = "monthly_data";
+	private final static String TABLE_DAILY = "daily_data";
 	private final static String FIELDTYPE_MONTH = "REAL";
 	private final static String FIELDTYPE_DAY = "REAL";
+	
 	public final static int START_YEAR = 2008;
 	public final static int START_MONTH = 9;
+	
+	private final static String[] measurementList = Measurement.kindList;
 	private final static String[] monthList = new String[] { "JAN", "FEB", "MAR", "APR", "MAY",
 		"JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
 	private final static String[] dayList = new String[] { 
@@ -61,9 +65,26 @@ public class MeasurementDBAdapter {
 	
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			// create yearly data table
 			StringBuilder query = new StringBuilder();
+
+			query.append("create table if not exists " + TABLE_DAILY + " (");
+			query.append(		"id INTEGER PRIMARY KEY AUTOINCREMENT, ");
+			query.append(		"Date TEXT, ");
+			query.append(		"Type TEXT ");
+			for (String measure : measurementList) {
+				query.append("," + measure + " " + FIELDTYPE_DAY);
+			}
+			query.append(");");
+			try {
+				Log.i("DB_createTable",query.toString());
+				db.execSQL(query.toString());
+			} catch (Exception e) {
+				Log.e("DB", "can't create table "+TABLE_YEARLY);
+				e.printStackTrace();
+			}
 			
+			query.delete(0, query.length());
+			// create yearly data table
 			query.append("create table if not exists "+ TABLE_YEARLY + " (");
 			query.append(		"Id INTEGER PRIMARY KEY AUTOINCREMENT, ");
 			query.append(		"Year INTEGER, "); 
@@ -80,11 +101,8 @@ public class MeasurementDBAdapter {
 				Log.e("DB", "can't create table "+TABLE_YEARLY);
 				e.printStackTrace();
 			}
-	
-			//db.endTransaction();
 			
 			query.delete(0, query.length());
-			
 			// create monthly data table
 			query.append("create table if not exists "+ TABLE_MONTHLY +" (");
 			query.append(		"Id INTEGER PRIMARY KEY AUTOINCREMENT, " );
@@ -115,6 +133,41 @@ public class MeasurementDBAdapter {
 			onCreate(db);
 		}
 	}
+
+	public void setDailyData (String date, String type, Measurement measure) {
+
+		ContentValues qryValues = new ContentValues();
+		qryValues.put("Date", date);
+		qryValues.put("Type", type);
+		qryValues.put("Elec", measure.getElec());
+		qryValues.put("Gas", measure.getGas());
+		qryValues.put("Hotwater", measure.getHotwater());
+		qryValues.put("Water", measure.getWater());
+		qryValues.put("Heat", measure.getHeat());
+		
+		Log.i("Qry_insertDailyData",qryValues.toString());
+		mDb.insert(TABLE_DAILY, null, qryValues);
+	}
+	
+	public Measurement getDailyData (String date, String type) {
+		Measurement measure = new Measurement();
+		
+		String selectQry = "SELECT * FROM " + TABLE_DAILY + " WHERE date='" + date + "' AND Type='" + type +"';";
+		Cursor cursor = mDb.rawQuery(selectQry, null);
+		
+		if (cursor.moveToFirst()) {
+			do {
+				measure.setElec((double) cursor.getDouble(3));
+				measure.setHotwater((double) cursor.getDouble(4));
+				measure.setHeat((double) cursor.getDouble(5));
+				measure.setWater((double) cursor.getDouble(6));
+				measure.setGas((double) cursor.getDouble(7));
+			} while (cursor.moveToNext());
+			
+		}
+		cursor.close();
+		return measure;		
+	}
 	
 	public void setYearlyData (int year, String kind, List<Double> values) {
 
@@ -140,13 +193,24 @@ public class MeasurementDBAdapter {
 			do {
 				
 				for (int i=3;i<cursor.getColumnCount();i++) {
-					resultSet.add((double) cursor.getInt(i));
+					resultSet.add((double) cursor.getDouble(i));
 				}
 			} while (cursor.moveToNext());
 			
 		}
 		cursor.close();
 		return resultSet;
+	}
+
+	public int checkExistsData (String date) {
+		int count = 0;
+		String selectQry = "SELECT * FROM " + TABLE_DAILY + " WHERE date='" + date +"';";
+		Log.i("checkExistsQry",selectQry);
+		Cursor cursor = mDb.rawQuery(selectQry, null);
+		count = cursor.getCount();
+		cursor.close();
+				
+		return count;
 	}
 	
 	public int checkExistsData (int year, String kind) {

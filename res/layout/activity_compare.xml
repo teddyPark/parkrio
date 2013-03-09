@@ -67,7 +67,7 @@
         </TableRow>
 		<View android:layout_height="2dip" android:background="#ff909090"/>
         <TableRow
-            android:id="@+id/rowElect"
+            android:id="@+id/rowElec"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" 
             android:background="#000"
@@ -75,7 +75,7 @@
             android:paddingBottom="5dp" >
 
             <TextView
-                android:id="@+id/elect"
+                android:id="@+id/elec"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -84,7 +84,7 @@
                 android:textSize="@dimen/type_text_size" />
 
             <TextView
-                android:id="@+id/todayElect"
+                android:id="@+id/todayElec"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
@@ -92,7 +92,7 @@
                 android:text="" />
             
             <TextView
-                android:id="@+id/yesterdayElect"
+                android:id="@+id/yesterdayElec"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
@@ -100,7 +100,7 @@
                 android:text="" />
 
             <TextView
-                android:id="@+id/thismonthElect"
+                android:id="@+id/thismonthElec"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
@@ -108,7 +108,7 @@
                 android:text="" />
 
             <TextView
-                android:id="@+id/lastmonthElect"
+                android:id="@+id/lastmonthElec"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
