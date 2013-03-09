@@ -288,7 +288,6 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 			dataset = new XYMultipleSeriesDataset();
 			
 			try {
-				URL url = new URL(getString(R.string.base_url) + SERVER_URI);
 				
 				if (cookieString != null) {
 					Log.i("cookie", cookieString);
@@ -306,8 +305,8 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 						} else {
 							// 서버에서 가져온다.
 							client = new HttpClientForParkrio("yearly");
-							postParams = "__VIEWSTATE="
-									+ URLEncoder.encode(client.paramViewState, client.SERVER_CHARSET)
+							URL url = new URL(getString(R.string.base_url) + client.uri);
+							postParams = "__VIEWSTATE="	+ client.paramViewState
 									+ "&selYear=" + (mYear-i) + "&selMonth=" + mMonth
 									+ "&sKind=" + intentKindParam.toUpperCase();
 							Log.i("url", postParams);
@@ -327,8 +326,7 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 					}
 				} else {
 					// if no-cookie then debug mode
-					addXYSeries(HttpClientForParkrio.readParkrioAsset(getApplicationContext(), SERVER_URI),String.format("%4d", mYear),0);
-					addXYSeries(HttpClientForParkrio.readParkrioAsset(getApplicationContext(), SERVER_URI2),String.format("%4d", mYear-1),0);
+					addXYSeries(HttpClientForParkrio.readParkrioAsset(getApplicationContext(), HttpClientForParkrio.YEARLY_URI),String.format("%4d", mYear),0);
 				}
 
 			} catch (LogoutException e) {

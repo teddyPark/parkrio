@@ -6,48 +6,51 @@ import java.util.Map;
 public class Measurement {
 	public static String[] kindList= new String[] {"elec","hotwater","heat","water","gas"};
 	
-	private float elec = 0;	// 전기
-	private float hotwater = 0;	// 온수
-	private float heat = 0;	// 난방
-	private float water = 0;	// 수도
-	private float gas = 0;	// 가스
+	private double elec = 0;	// 전기
+	private double hotwater = 0;	// 온수
+	private double heat = 0;	// 난방
+	private double water = 0;	// 수도
+	private double gas = 0;	// 가스
 	
-	public float getElec() {
+	public int size() {
+		return kindList.length;
+	}
+	public double getElec() {
 		return elec;
 	}
-	public void setElec(float elec) {
+	public void setElec(double elec) {
 		this.elec = elec;
 	}
-	public float getHotwater() {
+	public double getHotwater() {
 		return hotwater;
 	}
-	public void setHotwater(float hotwater) {
+	public void setHotwater(double hotwater) {
 		this.hotwater = hotwater;
 	}
-	public float getHeat() {
+	public double getHeat() {
 		return heat;
 	}
-	public void setHeat(float heat) {
+	public void setHeat(double heat) {
 		this.heat = heat;
 	}
-	public float getWater() {
+	public double getWater() {
 		return water;
 	}
-	public void setWater(float water) {
+	public void setWater(double water) {
 		this.water = water;
 	}
-	public float getGas() {
+	public double getGas() {
 		return gas;
 	}
-	public void setGas(float gas) {
+	public void setGas(double gas) {
 		this.gas = gas;
 	}
 	public String toString() {
 		return (new String(this.elec+";"+this.hotwater+";"+this.heat+";"+this.water+";"+this.gas));
 	}
-	public Map<String, Float> getObject(){
-		Map<String, Float> resultMap = new HashMap<String,Float>();
-		resultMap.put("Elect", elec);
+	public Map<String, Double> getObject(){
+		Map<String, Double> resultMap = new HashMap<String, Double>();
+		resultMap.put("Elec", elec);
 		resultMap.put("Hotwater", hotwater);
 		resultMap.put("Heat", heat);
 		resultMap.put("Water", water);

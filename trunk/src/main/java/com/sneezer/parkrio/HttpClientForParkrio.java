@@ -4,16 +4,21 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.util.Log;
 
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.HTMLElementName;
@@ -24,12 +29,12 @@ public class HttpClientForParkrio {
 	private final static String userAgentHeader = new String("Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1;; APCPMS=E839.353E.2E0A-win7^N20120502090046254556C65BBCE3E22DEE3F_1981^1^1^2186362890^30282584^2160947136; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; InfoPath.3; .NET4.0C; TCO_20130225130629)");
 	private final static String refererHeader = new String("http://211.49.175.211/hwork/iframe_DayValue.aspx");
 	
-	private final static String TODAY_PARAM_VIEWSTATE = "/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=";
-	private final static String TODAY_URI = "/hwork/iframe_DayValue.aspx";
-	private final static String MONTHLY_PARAM_VIEWSTATE = "/wEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4=";
-	private final static String MONTHLY_URI = "/hwork/iframe_MonthGraph.aspx";
-	private final static String YEARLY_PARAM_VIEWSTATE = "/wEPDwUKMjAyNzU3OTkxM2RkMXAfR6Im5D2lQRtlQ01g4/icE7k=";
-	private final static String YEARLY_URI = "/hwork/iframe_YearGraph.aspx";
+	public final static String TODAY_PARAM_VIEWSTATE = "/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=";
+	public final static String TODAY_URI = "/hwork/iframe_DayValue.aspx";
+	public final static String MONTHLY_PARAM_VIEWSTATE = "/wEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4=";
+	public final static String MONTHLY_URI = "/hwork/iframe_MonthGraph.aspx";
+	public final static String YEARLY_PARAM_VIEWSTATE = "/wEPDwUKMjAyNzU3OTkxM2RkMXAfR6Im5D2lQRtlQ01g4/icE7k=";
+	public final static String YEARLY_URI = "/hwork/iframe_YearGraph.aspx";
 	
 	private String html;
 	
@@ -37,15 +42,15 @@ public class HttpClientForParkrio {
 	public String paramViewState;
 	public String uri;
 	
-	public HttpClientForParkrio (String catId) {
-		if ( catId.equals("dayly") ) {
-			paramViewState=TODAY_PARAM_VIEWSTATE;
+	public HttpClientForParkrio (String catId) throws Exception {
+		if ( catId.equals("daily") ) {
+			paramViewState = URLEncoder.encode(TODAY_PARAM_VIEWSTATE, SERVER_CHARSET);
 			uri = TODAY_URI;
 		} else if ( catId.equals("monthly")) {
-			paramViewState=MONTHLY_PARAM_VIEWSTATE;
+			paramViewState=URLEncoder.encode(MONTHLY_PARAM_VIEWSTATE, SERVER_CHARSET);
 			uri=MONTHLY_URI;
 		} else if ( catId.equals("yearly")) {
-			paramViewState=YEARLY_PARAM_VIEWSTATE;
+			paramViewState=URLEncoder.encode(YEARLY_PARAM_VIEWSTATE, SERVER_CHARSET);
 			uri=YEARLY_URI;
 		}
 	}
@@ -171,6 +176,70 @@ public class HttpClientForParkrio {
 		return valueList;
 	}	
 	
+	public Map<String,Measurement> parseDayValuePage(String dayValue) throws Exception {
+		Measurement usedMeasure = new Measurement();
+		Measurement amountMeasure = new Measurement();
+		Map<String,Measurement> resultMap = new HashMap<String,Measurement>();
+		
+		Source source = new Source(dayValue);
+		source.fullSequentialParse();
+		
+		Element table = source.getAllElements(HTMLElementName.TABLE).get(0);
+		List trList = table.getAllElements(HTMLElementName.TR);
+		Iterator trIter = trList.iterator();
+		
+		trIter.next();
+		trIter.next();
+		trIter.next();
+ 
+		for ( int i = 0 ; i < 5 ; i++ ) {
+			Element tr = (Element) trIter.next();
+			List dataList = tr.getAllElements(HTMLElementName.TD);
+			Iterator tdIter = dataList.iterator();
+			
+			//current total value
+			tdIter.next();
+			tdIter.next();
+			Element data = (Element) tdIter.next();	// third TD
+			double amount = Double.parseDouble(data.getContent().getTextExtractor().toString());
+
+			// today use value
+			tdIter.next();
+			data = (Element) tdIter.next();	// fifth TD
+			double used = Double.parseDouble(data.getContent().getTextExtractor().toString());
+			
+			if (i == 0) {
+				// 전기
+				usedMeasure.setElec(used);
+				amountMeasure.setElec(amount);
+			} else if ( i == 1 ) {
+				// 수도
+				usedMeasure.setWater(used);
+				amountMeasure.setWater(amount);
+			} else if ( i == 2 ) {
+				// 온수
+				usedMeasure.setHotwater(used);
+				amountMeasure.setHotwater(amount);
+			} else if ( i == 3 ) {
+				// 가스
+				usedMeasure.setGas(used);
+				amountMeasure.setGas(amount);
+			} else if ( i == 4 ) {
+				// 난방
+				usedMeasure.setHeat(used);
+				amountMeasure.setHeat(amount);
+			}
+			 
+			trIter.next();				
+		}
+		Log.i("used",usedMeasure.toString());
+		Log.i("amount",amountMeasure.toString());
+		resultMap.put("used",usedMeasure);
+		resultMap.put("amount",amountMeasure);
+		source.clearCache();
+		return resultMap;
+	}
+
 	public static String readParkrioAsset(Context context, String filename) {
 		AssetManager am = context.getResources().getAssets();
 		InputStream is = null;

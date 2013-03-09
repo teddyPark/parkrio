@@ -61,9 +61,6 @@ import net.htmlparser.jericho.Source;
 public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGestureListener {
 	private final static String DEFAULT_CHART = "lineChart";
 	private final static int COUNT_DISPLAY_CHART = 2; 
-	private final static String SERVER_URI = "/hwork/iframe_MonthGraph.aspx";
-	private final static String SERVER_URI2 = "/hwork/iframe_MonthGraph2.aspx";
-	private final static int DATE_DIALOG_ID = 0;
 	private final static String TAG = "MonthChartActivity";
 	
 	private CookieManager cookieManager;
@@ -313,7 +310,6 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 			dataset = new XYMultipleSeriesDataset();
 
 			try {
-				URL url = new URL(getString(R.string.base_url) + SERVER_URI);
 				
 				if (cookieString != null) {
 					Log.i("cookie", cookieString);
@@ -330,8 +326,8 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 						} else {
 							// 서버에서 가져온다.
 							client = new HttpClientForParkrio("monthly");
-							postParams = "__VIEWSTATE="
-									+ URLEncoder.encode(client.paramViewState, client.SERVER_CHARSET)
+							URL url = new URL(getString(R.string.base_url) + client.uri);
+							postParams = "__VIEWSTATE=" + client.paramViewState
 									+ "&selYear=" + (mYear-i) + "&selMonth=" + mMonth
 									+ "&sKind=" + intentKindParam.toUpperCase();
 							Log.i("url", postParams);
@@ -351,8 +347,7 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 					}
 				} else {
 					// if no-cookie then debug mode
-					addXYSeries(HttpClientForParkrio.readParkrioAsset(getApplicationContext(), SERVER_URI),String.format("%4d-%2d", mYear, mMonth),0);
-					addXYSeries(HttpClientForParkrio.readParkrioAsset(getApplicationContext(), SERVER_URI2),String.format("%4d-%2d", mYear-1, mMonth),0);
+					addXYSeries(HttpClientForParkrio.readParkrioAsset(getApplicationContext(), HttpClientForParkrio.MONTHLY_URI),String.format("%4d-%2d", mYear, mMonth),0);
 				}
 
 			} catch (LogoutException e) {
