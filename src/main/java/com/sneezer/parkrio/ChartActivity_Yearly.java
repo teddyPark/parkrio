@@ -61,8 +61,6 @@ import net.htmlparser.jericho.Source;
 public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGestureListener {
 	private final static String DEFAULT_CHART = "lineChart"; 
 	private final static int COUNT_DISPLAY_CHART = 2; 
-	private final static String SERVER_URI = "/hwork/iframe_YearGraph.aspx";
-	private final static String SERVER_URI2 = "/hwork/iframe_YearGraph2.aspx";
 	private final static int DATE_DIALOG_ID = 0;
 	private final static String TAG = "YearChartActivity";
 	
@@ -72,22 +70,21 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 	private String serverHostName;
 	private MeasurementDBAdapter dbAdapter;
 
-	private String intentKindParam;
-	private String intentDateParam;
 	private TextView currentDateView;
-	private String chartType;
+	private DatePickerDialog datePickerDialog;
+	private GestureDetector ges;
 
+	private String chartType;
+	private String userId;
+	private String kind;
+	private String dateString;
 	private int mYear;
 	private int mMonth;
 	private int mDay;
-	private DatePickerDialog datePickerDialog;
 	
-	private GestureDetector ges;
 	private static final int SWIPE_MIN_DISTANCE = 120;
     private static final int SWIPE_MAX_OFF_PATH = 250;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
-
-	Map<String, Object> resultMap = new HashMap<String, Object>();
 
 	private static final int[] chartColorSet = new int[] { Color.RED, Color.BLUE, Color.MAGENTA, Color.GREEN };
 	private static final PointStyle[] chartPointStyleSet = new PointStyle[] { PointStyle.CIRCLE, PointStyle.DIAMOND, PointStyle.TRIANGLE, PointStyle.SQUARE };
@@ -105,30 +102,32 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 		cookieManager = CookieManager.getInstance();
 		serverHostName = getString(R.string.base_url);
 		cookieString = cookieManager.getCookie(serverHostName);
-		//cookieString ="ASP.NET_SessionId=o4xek2ukasbjqh55ken32mqu";
 
-		if (getIntent().getStringExtra("kind") != null) {
-			intentKindParam = getIntent().getStringExtra("kind");
-		} else {
-			intentKindParam = "elec";
-		}
-		if (getIntent().getStringExtra("date") != null) {
-			intentDateParam = getIntent().getStringExtra("date");
-		} else {
-			intentDateParam = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
-		}
 		preferences = getSharedPreferences("USER_INFO",	MODE_PRIVATE);
-		chartType = preferences.getString("chartType", DEFAULT_CHART);
-
-		if (savedInstanceState == null) {
-			String[] dateArray = intentDateParam.split("-");
-			mYear = Integer.parseInt(dateArray[0]);
-			mMonth = Integer.parseInt(dateArray[1]);
-			mDay = 1;
-		} else {
+		if ( savedInstanceState != null) {
+			userId = savedInstanceState.getString("userId");
+			kind = savedInstanceState.getString("kind");
+			dateString = savedInstanceState.getString("dateString");
 			mYear = savedInstanceState.getInt("mYear");
 			mMonth = savedInstanceState.getInt("mMonth");
 			mDay = savedInstanceState.getInt("mDay");
+			chartType = savedInstanceState.getString("chartType");
+		} else {
+			if (getIntent().getStringExtra("kind") != null) {
+				kind = getIntent().getStringExtra("kind");
+			} else {
+				kind = "elec";
+			}
+			if (getIntent().getStringExtra("date") != null) {
+				dateString = getIntent().getStringExtra("date");
+			} else {
+				dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+			}
+			String[] dateStrArray = dateString.split("-");
+			mYear = Integer.parseInt(dateStrArray[0]);
+			mMonth = Integer.parseInt(dateStrArray[1]);
+			mDay = 1;
+			chartType = preferences.getString("chartType", DEFAULT_CHART);
 		}
 
 		currentDateView = (TextView) findViewById(R.id.currentDateEntry);
@@ -186,12 +185,12 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 					}
 				});
 		
-		dbAdapter = new MeasurementDBAdapter(this);
+		dbAdapter = new MeasurementDBAdapter(this,this.userId);
 		dbAdapter.open();
 		
 		ges = new GestureDetector(this);
 		
-		new FetchDailyDataTask().execute(intentKindParam, intentDateParam);
+		new FetchDailyDataTask().execute(kind, dateString);
 	}
 
 	public void calDate(int termMonth) {
@@ -218,12 +217,13 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 	@Override
 	public void onNewIntent(Intent newIntent) {
 		Intent receivedIntent = getIntent();
+		
 		chartType = preferences.getString("chartType", DEFAULT_CHART);
 
-		dbAdapter = new MeasurementDBAdapter(getApplicationContext());
+		dbAdapter = new MeasurementDBAdapter(getApplicationContext(),this.userId);
 		dbAdapter.open();
 		
-		new FetchDailyDataTask().execute(intentKindParam, intentDateParam);
+		new FetchDailyDataTask().execute(kind, dateString);
 		super.onNewIntent(newIntent);
 	}
 
@@ -265,8 +265,11 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 
 	@Override
 	protected void onSaveInstanceState(Bundle outstate) {
-		outstate.putString("kind", intentKindParam);
-		outstate.putString("date", intentDateParam);
+		outstate.putString("kind", kind);
+		outstate.putString("date", dateString);
+		outstate.putString("userId", userId);
+		outstate.putString("chartType", chartType);
+		
 		outstate.putInt("mYear", mYear);
 		outstate.putInt("mMonth", mMonth);
 		outstate.putInt("mDay", mDay);
@@ -299,16 +302,16 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 					// 과거 데이터 DB insert
 					Calendar cal = Calendar.getInstance();
 					for ( int i=0 ; i < COUNT_DISPLAY_CHART ; i++ ) {
-						if ( dbAdapter.checkExistsData((mYear-i), intentKindParam) > 0 ) {
+						if ( dbAdapter.checkExistsData((mYear-i), kind) > 0 ) {
 							// DB 에 있다면 읽어온다.
-							addXYSeries(dbAdapter.getYearlyData(mYear-i, intentKindParam),String.format("%4d", mYear-i),0);
+							addXYSeries(dbAdapter.getYearlyData(mYear-i, kind),String.format("%4d", mYear-i),0);
 						} else {
 							// 서버에서 가져온다.
 							client = new HttpClientForParkrio("yearly");
 							URL url = new URL(getString(R.string.base_url) + client.uri);
 							postParams = "__VIEWSTATE="	+ client.paramViewState
 									+ "&selYear=" + (mYear-i) + "&selMonth=" + mMonth
-									+ "&sKind=" + intentKindParam.toUpperCase();
+									+ "&sKind=" + kind.toUpperCase();
 							Log.i("url", postParams);
 							
 							htmlBody = client.fetch(url, cookieString, postParams);
@@ -318,7 +321,7 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 							
 							if ( mYear-i != cal.get(Calendar.YEAR)) {
 								// 현재 달의 값은 DB 에 저장하지 않는다. 계속 변하고 있기 때문에...
-								dbAdapter.setYearlyData(mYear-i, intentKindParam, HttpClientForParkrio.parseYearlyDataFromHtml(htmlBody));
+								dbAdapter.setYearlyData(mYear-i, kind, HttpClientForParkrio.parseYearlyDataFromHtml(htmlBody));
 							}
 						}
 						if ( chartType.equals("barChart") )
@@ -396,7 +399,7 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 		updateDateDisplay();
 	}
 	
-	private Map<String, Object> getKindInfo(String kind) {
+	private Map<String, Object> getKindAttribute(String kind) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		if (kind.equals("elec")) {
 			result.put("title", "월별 전기 사용량");
@@ -429,7 +432,7 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 
 	private void drawBarChart() throws Exception {
 		
-		Map kindInfo = getKindInfo(intentKindParam);
+		Map kindInfo = getKindAttribute(kind);
 
 		int [] colors = new int[dataset.getSeriesCount()];
 		PointStyle[] styles = new PointStyle[dataset.getSeriesCount()];
@@ -495,7 +498,7 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 	}
 	private void drawLineChart() throws Exception {
 
-		Map kindInfo = getKindInfo(intentKindParam);
+		Map kindInfo = getKindAttribute(kind);
 
 		int [] colors = new int[dataset.getSeriesCount()];
 		PointStyle[] styles = new PointStyle[dataset.getSeriesCount()];

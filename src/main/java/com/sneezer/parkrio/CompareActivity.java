@@ -22,7 +22,8 @@ public class CompareActivity extends AbstractAsyncActivity {
 	private CookieManager cookieManager;
 	private String serverHostName;
 	private String cookieString;
-	private String intentDateParam;
+	private String dateString;
+	private String userId;
 	
 	private MeasurementDBAdapter dbAdapter;
 	
@@ -36,57 +37,64 @@ public class CompareActivity extends AbstractAsyncActivity {
 		setContentView(R.layout.activity_compare);
 		this.serverHostName = getString(R.string.base_url);
 		
+		if ( savedInstanceState != null) {
+			userId = savedInstanceState.getString("userId");
+			dateString = savedInstanceState.getString(dateString);
+		} else {
+			userId = getIntent().getStringExtra("userId");
+			if ( getIntent().getStringExtra("date") != null ) {
+				dateString = getIntent().getStringExtra("date");
+			} else {
+				dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+			}
+		}
+
 		CookieSyncManager.createInstance(this);
 		cookieManager = CookieManager.getInstance();
 		CookieSyncManager.getInstance().startSync();
 		cookieString = cookieManager.getCookie(serverHostName);
 		Log.i("oncreate",cookieManager.getCookie(serverHostName));
-
-		if ( getIntent().getStringExtra("date") != null ) {
-			intentDateParam = getIntent().getStringExtra("date");
-		} else {
-			intentDateParam = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
-		}
 		
-		final String todayString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
 		findViewById(R.id.elec).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				startChartActivity("elec",todayString);
+				startChartActivity("elec",dateString);
 			}
 		});
 
 		findViewById(R.id.heat).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				startChartActivity("heat",todayString);
+				startChartActivity("heat",dateString);
 			}
 		});
 
 		findViewById(R.id.hotwater).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				startChartActivity("hotwater",todayString);			}
+				startChartActivity("hotwater",dateString);			}
 		});
 
 		findViewById(R.id.gas).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				startChartActivity("gas",todayString);			}
+				startChartActivity("gas",dateString);			}
 		});
 
 		findViewById(R.id.water).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				startChartActivity("water",todayString);
+				startChartActivity("water",dateString);
 			}
 		});
 		
-		dbAdapter = new MeasurementDBAdapter(this);
+		dbAdapter = new MeasurementDBAdapter(this,this.userId);
 		dbAdapter.open();
 		
-		new FetchDailyDataTask().execute(intentDateParam);
+		new FetchDailyDataTask().execute(dateString);
 	}
 	
 	public void startChartActivity ( String kind, String date ) {
 		Intent chartIntent = new Intent(getApplicationContext(), ChartActivity_Monthly.class);
 		chartIntent.putExtra("type", kind);
 		chartIntent.putExtra("date", date);
+		chartIntent.putExtra("userId", userId);
+
 		startActivity(chartIntent);
 	}
 
@@ -104,12 +112,20 @@ public class CompareActivity extends AbstractAsyncActivity {
 	
 	@Override
 	public void onNewIntent(Intent newIntent) {
-		dbAdapter = new MeasurementDBAdapter(getApplicationContext());
+		dbAdapter = new MeasurementDBAdapter(getApplicationContext(),this.userId);
 		dbAdapter.open();
 		
-		new FetchDailyDataTask().execute(intentDateParam);
+		new FetchDailyDataTask().execute(dateString);
 		super.onNewIntent(newIntent);
 	}	
+	
+	@Override
+	protected void onSavedInstranceState(Bundle outState) {
+		outState.putString("userId", userId);
+		outState.putString("dateString", dateString);
+		
+		super.onSavedInstranceState(outState);
+	}
 
 	private void setMeasurementText (String columnId, Measurement measure) {
 		Class<R.id> Ids = R.id.class;
@@ -145,10 +161,9 @@ public class CompareActivity extends AbstractAsyncActivity {
 			String postParams = new String();
 
 			try { 
-				URL url = new URL(serverHostName+"/hwork/iframe_DayValue.aspx");
 
 		        java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd");
-				java.util.Date today = format.parse(params[0]);
+				java.util.Date today = format.parse(dateString);
 				// 금일 검침 데이터 가져오기
 				//Date today = new java.util.Date();
 				
@@ -166,6 +181,7 @@ public class CompareActivity extends AbstractAsyncActivity {
 						
 					} else {
 						HttpClientForParkrio client = new HttpClientForParkrio("daily");
+						URL url = new URL(serverHostName+client.uri);
 						postParams = "__VIEWSTATE="	+ client.paramViewState	+ "&txtFDate=" + dateList.get(i);
 						Log.i("postParams", postParams);
 						

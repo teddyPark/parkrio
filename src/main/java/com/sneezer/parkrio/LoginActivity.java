@@ -1,7 +1,6 @@
 package com.sneezer.parkrio;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.List;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.cookie.Cookie;
@@ -28,20 +26,22 @@ import android.text.util.Linkify;
 import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AbstractAsyncActivity {
+public class LoginActivity extends AbstractAsyncActivity {
 
 	private static String TAG = "parkrio";
 	private SharedPreferences preferences;
 	private CookieManager cookieManager;
 	private String serverHostName;
 	
-	private MeasurementDBAdapter dbAdapter;
+	private String userId;
+	private String userPassword;
+	private boolean isRemember;
+	private boolean isAutoLogin;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -85,16 +85,12 @@ public class MainActivity extends AbstractAsyncActivity {
 			
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-					
-					SharedPreferences.Editor editor = preferences.edit();
-					editor.putString("username", inputUsername.getText().toString());
-					editor.putString("password", inputPassword.getText().toString());
-					editor.putBoolean("isRemember", rememberChk.isChecked());
-					editor.putBoolean("isAutoLogin", autologinChk.isChecked());
-					
-					editor.commit();
-				new FetchSecuredResourceTask().execute();
+				userId = inputUsername.getText().toString();
+				userPassword = inputPassword.getText().toString();
+				isRemember = rememberChk.isChecked();
+				isAutoLogin = autologinChk.isChecked();
 				
+				new FetchSecuredResourceTask().execute();
 			}
 		});
 		
@@ -105,8 +101,6 @@ public class MainActivity extends AbstractAsyncActivity {
 			}
 		});
 
-		
-		
 		preferences = getSharedPreferences("USER_INFO",	MODE_PRIVATE);
 
 		// shared preference 값을 읽어옴.
@@ -126,9 +120,6 @@ public class MainActivity extends AbstractAsyncActivity {
 			rememberChk.setChecked(isRemember);
 			autologinChk.setChecked(isAutoLogin);
 		}
-
-		dbAdapter = new MeasurementDBAdapter(this);
-		dbAdapter.open();
 
 		if (isAutoLogin && !(getIntent().getBooleanExtra("needLogin", false))) {
 			new FetchSecuredResourceTask().execute();
@@ -157,7 +148,7 @@ public class MainActivity extends AbstractAsyncActivity {
 		return true;
 	}
 	
-	private class FetchSecuredResourceTask extends AsyncTask<Void, Void, Message> {
+	private class FetchSecuredResourceTask extends AsyncTask<Void, Void, String> {
 		private String username;
 		private String password;
 		private boolean isLogon = false;
@@ -177,7 +168,7 @@ public class MainActivity extends AbstractAsyncActivity {
 		}
 
 		@Override
-		protected Message doInBackground(Void... arg0) {
+		protected String doInBackground(Void... arg0) {
 			// TODO Auto-generated method stub
 			boolean isLogon = false;
 			HttpResponse response = null;
@@ -192,12 +183,13 @@ public class MainActivity extends AbstractAsyncActivity {
 			requestParams.add(new BasicNameValuePair("upwd",this.password));
 			
 			try {
-				((HttpPost) httpost).setEntity(new UrlEncodedFormEntity(requestParams));
+				httpost.setEntity(new UrlEncodedFormEntity(requestParams));
+				httpclient.getParams().setParameter("http.connection.timeout", 3000);
+				httpclient.getParams().setParameter("http.socket.timeout", 2000);
 				response = httpclient.execute(httpost);
-			} catch (ClientProtocolException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
+	        	return "SERVER FAIL";
 			}
 			
 			if ( response != null ) {
@@ -215,6 +207,7 @@ public class MainActivity extends AbstractAsyncActivity {
 		        	br.close();
 		        } catch (Exception e) {
 		        	e.printStackTrace();
+		        	return "SERVER FAIL";
 		        }
 
 		        if ( html.toString().indexOf("alert") == -1 ) {
@@ -237,22 +230,36 @@ public class MainActivity extends AbstractAsyncActivity {
 				}
 	        }			
 
-	        return null;
+	        return "OK";
 		}
 
 		@Override
-		protected void onPostExecute(Message result) {
-			//dbAdapter.close();			
+		protected void onPostExecute(String result) {
 			dismissProgressDialog();
 			
 			if ( isLogon ) {
+				if (isRemember) {
+					SharedPreferences.Editor editor = preferences.edit();
+					editor.putString("username", userId);
+					editor.putString("password", userPassword);
+					editor.putBoolean("isRemember", isRemember);
+					editor.putBoolean("isAutoLogin", isAutoLogin);
+						
+					editor.commit();
+				}
+				
 				Intent compareIntent = new Intent(getApplicationContext(), CompareActivity.class);
 				String todayString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
 				compareIntent.putExtra("date",todayString);
+				compareIntent.putExtra("userId",userId);
 				startActivity(compareIntent);
 				finish();
 			} else {
-				Toast.makeText(getApplicationContext(), "로그인 실패.\nID/비밀번호를 확인하세요.", Toast.LENGTH_LONG).show();
+				if ( result.equals("SERVER FAIL")) {
+					Toast.makeText(getApplicationContext(), "일시적으로 서버 접속이 안되고 있습니다.\n잠시 후 이용해 주세요..", Toast.LENGTH_LONG).show();
+				} else {
+					Toast.makeText(getApplicationContext(), "로그인 실패.\nID/비밀번호를 확인하세요.", Toast.LENGTH_LONG).show();
+				}
 			}
 		}
 	}
