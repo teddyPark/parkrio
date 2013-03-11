@@ -69,11 +69,12 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 	private String serverHostName;
 	private MeasurementDBAdapter dbAdapter;
 	
-	private String intentKindParam;
-	private String intentDateParam;
+	private String kind;
+	private String dateString;
 	private TextView currentDateView;
 	private String chartType;
 
+	private String userId;
 	private int mYear;
 	private int mMonth;
 	private int mDay;
@@ -100,31 +101,34 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 		cookieManager = CookieManager.getInstance();
 		serverHostName = getString(R.string.base_url);
 		cookieString = cookieManager.getCookie(serverHostName);
-		//cookieString ="ASP.NET_SessionId=o4xek2ukasbjqh55ken32mqu";
 
-		if (getIntent().getStringExtra("kind") != null) {
-			intentKindParam = getIntent().getStringExtra("kind");
-		} else {
-			intentKindParam = "elec";
-		}
-		if (getIntent().getStringExtra("date") != null) {
-			intentDateParam = getIntent().getStringExtra("date");
-		} else {
-			intentDateParam = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
-		}
 		preferences = getSharedPreferences("USER_INFO",	MODE_PRIVATE);
-		chartType = preferences.getString("chartType", DEFAULT_CHART);
-
-		if (savedInstanceState == null) {
-			String[] dateArray = intentDateParam.split("-");
-			mYear = Integer.parseInt(dateArray[0]);
-			mMonth = Integer.parseInt(dateArray[1]);
-			mDay = 1;
-		} else {
+		if ( savedInstanceState != null) {
+			userId = savedInstanceState.getString("userId");
+			kind = savedInstanceState.getString("kind");
+			dateString = savedInstanceState.getString("dateString");
+			chartType = savedInstanceState.getString("chartType");
 			mYear = savedInstanceState.getInt("mYear");
 			mMonth = savedInstanceState.getInt("mMonth");
 			mDay = savedInstanceState.getInt("mDay");
+		} else {
+			if (getIntent().getStringExtra("kind") != null) {
+				kind = getIntent().getStringExtra("kind");
+			} else {
+				kind = "elec";
+			}
+			if (getIntent().getStringExtra("date") != null) {
+				dateString = getIntent().getStringExtra("date");
+			} else {
+				dateString = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+			}
+			String[] dateStrArray = dateString.split("-");
+			mYear = Integer.parseInt(dateStrArray[0]);
+			mMonth = Integer.parseInt(dateStrArray[1]);
+			mDay = 1;
+			chartType = preferences.getString("chartType", DEFAULT_CHART);
 		}
+		
 
 		currentDateView = (TextView) findViewById(R.id.currentDateEntry);
 		currentDateView.setText(mYear + "-" + mMonth);
@@ -200,7 +204,7 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 				new View.OnClickListener() {
 					public void onClick(View arg0) {
 						Intent chartIntent = new Intent(ChartActivity_Monthly.this, ChartActivity_Yearly.class);
-						chartIntent.putExtra("kind", intentKindParam);
+						chartIntent.putExtra("kind", kind);
 						chartIntent.putExtra("date", Integer.toString(mYear)+"-"+Integer.toString(mMonth));
 						startActivity(chartIntent);
 					}
@@ -208,10 +212,10 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 		
 		ges = new GestureDetector(this);
 
-		dbAdapter = new MeasurementDBAdapter(this);
+		dbAdapter = new MeasurementDBAdapter(this,this.userId);
 		dbAdapter.open();
 		
-		new FetchDailyDataTask().execute(intentKindParam, intentDateParam);
+		new FetchDailyDataTask().execute(kind, dateString);
 	}
 
 	public void calDate(int termMonth) {
@@ -240,9 +244,9 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 		Intent receivedIntent = getIntent();
 		chartType = preferences.getString("chartType", DEFAULT_CHART);
 
-		dbAdapter = new MeasurementDBAdapter(getApplicationContext());
+		dbAdapter = new MeasurementDBAdapter(getApplicationContext(),this.userId);
 		dbAdapter.open();
-		new FetchDailyDataTask().execute(intentKindParam, intentDateParam);
+		new FetchDailyDataTask().execute(kind, dateString);
 		super.onNewIntent(newIntent);
 	}
 
@@ -287,8 +291,10 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 
 	@Override
 	protected void onSaveInstanceState(Bundle outstate) {
-		outstate.putString("kind", intentKindParam);
-		outstate.putString("date", intentDateParam);
+		outstate.putString("userId", userId);
+		outstate.putString("kind", kind);
+		outstate.putString("date", dateString);
+		outstate.putString("chartType",chartType);
 		outstate.putInt("mYear", mYear);
 		outstate.putInt("mMonth", mMonth);
 		outstate.putInt("mDay", mDay);
@@ -320,16 +326,16 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 					// 과거 데이터 DB insert
 					Calendar cal = Calendar.getInstance();
 					for ( int i=0 ; i < COUNT_DISPLAY_CHART ; i++ ) {
-						if ( dbAdapter.checkExistsData((mYear-i), mMonth, intentKindParam) > 0 ) {
+						if ( dbAdapter.checkExistsData((mYear-i), mMonth, kind) > 0 ) {
 							// DB 에 있다면 읽어온다.
-							addXYSeries(dbAdapter.getMonthlyData(mYear-i, mMonth, intentKindParam),String.format("%4d-%02d", mYear-i, mMonth),0);
+							addXYSeries(dbAdapter.getMonthlyData(mYear-i, mMonth, kind),String.format("%4d-%02d", mYear-i, mMonth),0);
 						} else {
 							// 서버에서 가져온다.
 							client = new HttpClientForParkrio("monthly");
 							URL url = new URL(getString(R.string.base_url) + client.uri);
 							postParams = "__VIEWSTATE=" + client.paramViewState
 									+ "&selYear=" + (mYear-i) + "&selMonth=" + mMonth
-									+ "&sKind=" + intentKindParam.toUpperCase();
+									+ "&sKind=" + kind.toUpperCase();
 							Log.i("url", postParams);
 							
 							htmlBody = client.fetch(url, cookieString, postParams);
@@ -339,7 +345,7 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 							
 							if ( mYear-i != cal.get(Calendar.YEAR)) {
 								// 현재 달의 값은 DB 에 저장하지 않는다. 계속 변하고 있기 때문에...
-								dbAdapter.setMonthlyData(mYear-i, mMonth, intentKindParam, HttpClientForParkrio.parseMonthlyDataFromHtml(htmlBody));
+								dbAdapter.setMonthlyData(mYear-i, mMonth, kind, HttpClientForParkrio.parseMonthlyDataFromHtml(htmlBody));
 							}
 						}
 						if ( chartType.equals("barChart") )
@@ -417,7 +423,7 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 		updateDateDisplay();
 	}
 	
-	private Map<String, Object> getKindInfo(String kind) {
+	private Map<String, Object> getKindAttribute(String kind) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		if (kind.equals("elec")) {
 			result.put("title", "일별 전기 사용량");
@@ -450,7 +456,7 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 
 	private void drawBarChart() throws Exception {
 		
-		Map kindInfo = getKindInfo(intentKindParam);
+		Map kindInfo = getKindAttribute(kind);
 
 		int [] colors = new int[dataset.getSeriesCount()];
 		PointStyle[] styles = new PointStyle[dataset.getSeriesCount()];
@@ -518,7 +524,7 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 	
 	private void drawLineChart() throws Exception {
 
-		Map kindInfo = getKindInfo(intentKindParam);
+		Map kindInfo = getKindAttribute(kind);
 
 		int [] colors = new int[dataset.getSeriesCount()];
 		PointStyle[] styles = new PointStyle[dataset.getSeriesCount()];

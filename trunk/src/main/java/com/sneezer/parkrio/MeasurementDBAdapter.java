@@ -38,9 +38,11 @@ public class MeasurementDBAdapter {
 	private SQLiteDatabase mDb;
 
 	public final Context mContext;
+	private String userId;
 	
-	public MeasurementDBAdapter (Context ctx) {
+	public MeasurementDBAdapter ( Context ctx, String userId ) {
 		this.mContext = ctx;
+		this.userId = userId;
 	}
 	
 	public MeasurementDBAdapter open() throws SQLException {
@@ -69,6 +71,7 @@ public class MeasurementDBAdapter {
 
 			query.append("create table if not exists " + TABLE_DAILY + " (");
 			query.append(		"id INTEGER PRIMARY KEY AUTOINCREMENT, ");
+			query.append(		"UserId TEXT, ");
 			query.append(		"Date TEXT, ");
 			query.append(		"Type TEXT ");
 			for (String measure : measurementList) {
@@ -87,6 +90,7 @@ public class MeasurementDBAdapter {
 			// create yearly data table
 			query.append("create table if not exists "+ TABLE_YEARLY + " (");
 			query.append(		"Id INTEGER PRIMARY KEY AUTOINCREMENT, ");
+			query.append(		"UserId TEXT, "); 
 			query.append(		"Year INTEGER, "); 
 			query.append(		"Kind TEXT "); 
 			for (String month : monthList) {
@@ -106,6 +110,7 @@ public class MeasurementDBAdapter {
 			// create monthly data table
 			query.append("create table if not exists "+ TABLE_MONTHLY +" (");
 			query.append(		"Id INTEGER PRIMARY KEY AUTOINCREMENT, " );
+			query.append(		"UserId TEXT, " );
 			query.append(		"Year INTEGER, " );
 			query.append(		"Month INTEGER, " );
 			query.append(		"Kind TEXT ");		
@@ -138,6 +143,7 @@ public class MeasurementDBAdapter {
 
 		ContentValues qryValues = new ContentValues();
 		qryValues.put("Date", date);
+		qryValues.put("userId", this.userId);
 		qryValues.put("Type", type);
 		qryValues.put("Elec", measure.getElec());
 		qryValues.put("Gas", measure.getGas());
@@ -152,16 +158,16 @@ public class MeasurementDBAdapter {
 	public Measurement getDailyData (String date, String type) {
 		Measurement measure = new Measurement();
 		
-		String selectQry = "SELECT * FROM " + TABLE_DAILY + " WHERE date='" + date + "' AND Type='" + type +"';";
+		String selectQry = "SELECT * FROM " + TABLE_DAILY + " WHERE userId=" + this.userId +" AND date='" + date + "' AND Type='" + type +"';";
 		Cursor cursor = mDb.rawQuery(selectQry, null);
 		
 		if (cursor.moveToFirst()) {
 			do {
-				measure.setElec((double) cursor.getDouble(3));
-				measure.setHotwater((double) cursor.getDouble(4));
-				measure.setHeat((double) cursor.getDouble(5));
-				measure.setWater((double) cursor.getDouble(6));
-				measure.setGas((double) cursor.getDouble(7));
+				measure.setElec((double) cursor.getDouble(4));
+				measure.setHotwater((double) cursor.getDouble(5));
+				measure.setHeat((double) cursor.getDouble(6));
+				measure.setWater((double) cursor.getDouble(7));
+				measure.setGas((double) cursor.getDouble(8));
 			} while (cursor.moveToNext());
 			
 		}
@@ -172,6 +178,7 @@ public class MeasurementDBAdapter {
 	public void setYearlyData (int year, String kind, List<Double> values) {
 
 		ContentValues qryValues = new ContentValues();
+		qryValues.put("userId",this.userId);
 		qryValues.put("Year", year);
 		qryValues.put("Kind", kind);
 		int index = 0;
@@ -186,13 +193,14 @@ public class MeasurementDBAdapter {
 	public List<Double> getYearlyData (int year, String kind) {
 		List<Double> resultSet = new ArrayList<Double>();
 		
-		String selectQry = "SELECT * FROM " + TABLE_YEARLY + " WHERE year=" + year + " AND Kind='" + kind + "';";
+		String selectQry = "SELECT * FROM " + TABLE_YEARLY + " WHERE userId=" + this.userId +
+				" AND year=" + year + " AND Kind='" + kind + "';";
 		Cursor cursor = mDb.rawQuery(selectQry, null);
 		
 		if (cursor.moveToFirst()) {
 			do {
 				
-				for (int i=3;i<cursor.getColumnCount();i++) {
+				for (int i=4;i<cursor.getColumnCount();i++) {
 					resultSet.add((double) cursor.getDouble(i));
 				}
 			} while (cursor.moveToNext());
@@ -204,7 +212,8 @@ public class MeasurementDBAdapter {
 
 	public int checkExistsData (String date) {
 		int count = 0;
-		String selectQry = "SELECT * FROM " + TABLE_DAILY + " WHERE date='" + date +"';";
+		String selectQry = "SELECT * FROM " + TABLE_DAILY + " WHERE userId=" + this.userId +
+				" AND date='" + date +"';";
 		Log.i("checkExistsQry",selectQry);
 		Cursor cursor = mDb.rawQuery(selectQry, null);
 		count = cursor.getCount();
@@ -215,7 +224,8 @@ public class MeasurementDBAdapter {
 	
 	public int checkExistsData (int year, String kind) {
 		int count = 0;
-		String selectQry = "SELECT * FROM " + TABLE_YEARLY + " WHERE year="+year+" AND kind='"+kind+"';";
+		String selectQry = "SELECT * FROM " + TABLE_YEARLY + " WHERE userId=" + this.userId +
+				" AND year="+year+" AND kind='"+kind+"';";
 		Log.i("checkExistsQry",selectQry);
 		Cursor cursor = mDb.rawQuery(selectQry, null);
 		count = cursor.getCount();
@@ -226,7 +236,8 @@ public class MeasurementDBAdapter {
 	
 	public int checkExistsData (int year, int month, String kind) {
 		int count = 0;
-		String selectQry = "SELECT * FROM " + TABLE_MONTHLY + " WHERE year="+year+" AND month=" + month + " AND kind='"+kind+"';";
+		String selectQry = "SELECT * FROM " + TABLE_MONTHLY + " WHERE userId=" + this.userId +
+				" AND year="+year+" AND month=" + month + " AND kind='"+kind+"';";
 		Log.i("checkExistsQry",selectQry);
 		Cursor cursor = mDb.rawQuery(selectQry, null);
 		count = cursor.getCount();
@@ -237,6 +248,7 @@ public class MeasurementDBAdapter {
 	public void setMonthlyData (int year, int month, String kind, List<Double> values) {
 		
 		ContentValues qryValues = new ContentValues();
+		qryValues.put("userId", this.userId);
 		qryValues.put("Year", year);
 		qryValues.put("Month", month);
 		qryValues.put("Kind", kind);
@@ -258,12 +270,13 @@ public class MeasurementDBAdapter {
 	    int lastDayOfMonth = cal.getActualMaximum(Calendar.DATE);
 	    
 	    // select * from monthly_data where kind='elec' ORDER BY year DESC, month DESC;
-		String selectQry = "SELECT * FROM " + TABLE_MONTHLY + " WHERE Year=" + year + " AND Month=" + month + " AND Kind='" + kind + "';";
+		String selectQry = "SELECT * FROM " + TABLE_MONTHLY + " WHERE userId=" + this.userId + 
+				" AND Year=" + year + " AND Month=" + month + " AND Kind='" + kind + "';";
 		Cursor cursor = mDb.rawQuery(selectQry, null);
 		
 		if (cursor.moveToFirst()) {
 			do {
-				for (int i=4; i < lastDayOfMonth+4; i++) {
+				for (int i=5; i < lastDayOfMonth+4; i++) {
 					resultSet.add((double) cursor.getDouble(i));
 				}
 			} while (cursor.moveToNext());

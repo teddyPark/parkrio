@@ -63,6 +63,8 @@ public class HttpClientForParkrio {
 		// set http client
 		try {
 			httpClient = (HttpURLConnection) url.openConnection();
+			httpClient.setConnectTimeout(3000);
+			httpClient.setReadTimeout(2000);
 			httpClient.setRequestMethod("POST");
 			httpClient.setRequestProperty("Referer",refererHeader);
 			httpClient.setRequestProperty("User-Agent", userAgentHeader);
@@ -274,8 +276,5 @@ public class HttpClientForParkrio {
         }
 		return false;
 	}
-	
-//	public void finalize() {
-//
-//	}
+
 }

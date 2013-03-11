@@ -32,6 +32,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.CookieManager;
@@ -109,7 +110,7 @@ public abstract class AbstractAsyncActivity extends Activity {
 		
 	
 	public boolean logout() {
-		Intent startIntent = new Intent(getApplicationContext(), MainActivity.class);
+		Intent startIntent = new Intent(getApplicationContext(), LoginActivity.class);
 		startIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startIntent.putExtra("needLogin", true);
 		startActivity(startIntent);
@@ -118,12 +119,17 @@ public abstract class AbstractAsyncActivity extends Activity {
 	}
 
 	public boolean cancelAutologin() {
-		Intent startIntent = new Intent(getApplicationContext(), MainActivity.class);
+		Intent startIntent = new Intent(getApplicationContext(), LoginActivity.class);
 		startIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startIntent.putExtra("needLogin", true);
 		startActivity(startIntent);
 		finish();		
 		return true;
+	}
+
+	protected void onSavedInstranceState(Bundle outState) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }
