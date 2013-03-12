@@ -28,8 +28,11 @@ import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.Source;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.os.Bundle;
@@ -47,7 +50,9 @@ public abstract class AbstractAsyncActivity extends Activity {
 	protected static final String TAG = AbstractAsyncActivity.class.getSimpleName();
 
 	private ProgressDialog progressDialog;
-
+	private MeasurementDBAdapter dbAdapter;
+	private String userId;
+	
 	private boolean destroyed = false;
 
 	// ***************************************
@@ -88,7 +93,7 @@ public abstract class AbstractAsyncActivity extends Activity {
 		//getMenuInflater().inflate(R.menu.compare, menu);
 		super.onCreateOptionsMenu(menu);
 		MenuItem item = menu.add(0,1,0,"로그아웃");
-		//menu.add(0,2,0,"자동로그인 해제");
+		menu.add(0,2,0,"Cache data 삭제");
 		return true;
 	}
 	
@@ -100,14 +105,58 @@ public abstract class AbstractAsyncActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
 		switch (item.getItemId()) {
-		case 1: logout();
+		case 1: createLogoutDialogBox().show();
 			return true;
-		case 2: changeChart();
+		case 2: createCacheClearDialogBox().show();
 			return true;
 		}
 		return false;
 	}
 		
+	public void onClickCacheClear() {
+		
+		dbAdapter = new MeasurementDBAdapter(this,this.userId);
+		dbAdapter.open();
+		dbAdapter.resetCacheData();
+		dbAdapter.close();
+	}
+	
+	public AlertDialog createLogoutDialogBox() {
+		AlertDialog logoutDialogBox = new AlertDialog.Builder(this)
+		.setTitle("안내")
+		.setMessage("로그아웃하시겠습니까?")
+		.setPositiveButton("예",new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				logout();
+			}
+		})
+		.setNeutralButton("아니요",new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+								
+			}
+		})
+		.create();
+		return logoutDialogBox;
+	}
+	
+	public AlertDialog createCacheClearDialogBox() {
+		AlertDialog cacheClearDialogBox = new AlertDialog.Builder(this)
+		.setTitle("안내")
+		.setMessage("임시데이터는 조회했던 과거자료를 저장하고 있습니다.\n임시저장 데이터를 삭제하시겠습니까?")
+		.setPositiveButton("예",new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				onClickCacheClear();
+			}
+		})
+		.setNeutralButton("아니요",new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+								
+			}
+		})
+		.create();
+		
+		return cacheClearDialogBox;
+	}
 	
 	public boolean logout() {
 		Intent startIntent = new Intent(getApplicationContext(), LoginActivity.class);

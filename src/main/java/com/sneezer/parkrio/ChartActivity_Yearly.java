@@ -113,6 +113,8 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 			mDay = savedInstanceState.getInt("mDay");
 			chartType = savedInstanceState.getString("chartType");
 		} else {
+			this.userId=getIntent().getStringExtra("userId");
+			
 			if (getIntent().getStringExtra("kind") != null) {
 				kind = getIntent().getStringExtra("kind");
 			} else {
@@ -150,7 +152,9 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 							Field datePickerFields[] = dateField.getType().getDeclaredFields();
 
 							for (Field datePickerField : datePickerFields) {
-								if ("mDaySpinner".equals(datePickerField.getName())	|| "mDayPicker".equals(datePickerField.getName())) {
+								Log.i("name",datePickerField.getName());
+								if ("mDaySpinner".equals(datePickerField.getName())	|| "mDayPicker".equals(datePickerField.getName()) || 
+										"mMonthSpinner".equals(datePickerField.getName())	|| "mMonthPicker".equals(datePickerField.getName()) ) {
 									datePickerField.setAccessible(true);
 									Object dayPicker = new Object();
 									dayPicker = datePickerField.get(datePicker);
@@ -372,6 +376,7 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 		Log.i("onCreateOptionsMenu","called");
 		MenuItem item = menu.add(0,1,0,"로그아웃");
 		menu.add(0,2,0,"챠트 바꾸기");
+		menu.add(0,3,0,"Cache data 삭제");
 		return true;
 	}
 
@@ -379,13 +384,16 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
 		switch (item.getItemId()) {
-		case 1: logout();
+		case 1: createLogoutDialogBox().show();
 			return true;
 		case 2: changeChart();
+			return true;
+		case 3: createCacheClearDialogBox().show();
 			return true;
 		}
 		return false;
 	}
+	
 	
 	@Override
 	public void changeChart() {
