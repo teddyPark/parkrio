@@ -136,7 +136,14 @@ public class HttpClientForParkrio {
 				}
 			}
 		}
-		source.clearCache();		
+		source.clearCache();	
+		for (int i=valueList.size()-1; i>=0 ; i--) {
+			if ( valueList.get(i) == 0.0 ) {
+				valueList.remove(i);
+			} else {
+				break;
+			}
+		}
 		return valueList;
 	}
 		
@@ -174,7 +181,15 @@ public class HttpClientForParkrio {
 				}
 			}
 		}
+		
 		source.clearCache();
+		for (int i=valueList.size()-1; i>=0 ; i--) {
+			if ( valueList.get(i) == 0.0 ) {
+				valueList.remove(i);
+			} else {
+				break;
+			}
+		}
 		return valueList;
 	}	
 	

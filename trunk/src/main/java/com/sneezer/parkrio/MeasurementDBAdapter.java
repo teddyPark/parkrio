@@ -15,11 +15,13 @@ import android.util.Log;
 
 public class MeasurementDBAdapter {
 	
+	private final static String TAG = "MeasurementDBAdapter";
 	private final static int DATABASE_VERSION = 1;
 	private final static String DATABASE_NAME = "MEASUREMENT.db";
 	private final static String TABLE_YEARLY = "yearly_data";
 	private final static String TABLE_MONTHLY = "monthly_data";
 	private final static String TABLE_DAILY = "daily_data";
+	private String[] tableList = new String[] {TABLE_DAILY, TABLE_YEARLY, TABLE_MONTHLY};
 	private final static String FIELDTYPE_MONTH = "REAL";
 	private final static String FIELDTYPE_DAY = "REAL";
 	
@@ -79,10 +81,10 @@ public class MeasurementDBAdapter {
 			}
 			query.append(");");
 			try {
-				Log.i("DB_createTable",query.toString());
 				db.execSQL(query.toString());
+				Log.i(TAG,"Table Create query="+query.toString());
 			} catch (Exception e) {
-				Log.e("DB", "can't create table "+TABLE_YEARLY);
+				Log.e(TAG, "can't create table "+TABLE_YEARLY);
 				e.printStackTrace();
 			}
 			
@@ -99,10 +101,10 @@ public class MeasurementDBAdapter {
 			query.append(");");
 
 			try {
-				Log.i("DB_createTable",query.toString());
 				db.execSQL(query.toString());
+				Log.i(TAG,"Table Create query="+query.toString());
 			} catch (Exception e) {
-				Log.e("DB", "can't create table "+TABLE_YEARLY);
+				Log.e(TAG, "can't create table "+TABLE_YEARLY);
 				e.printStackTrace();
 			}
 			
@@ -120,10 +122,10 @@ public class MeasurementDBAdapter {
 			query.append(");");
 	
 			try {
-				Log.i("DB_createTable",query.toString());
 				db.execSQL(query.toString());
+				Log.i(TAG,"Table Create query="+query.toString());
 			} catch (Exception e) {
-				Log.e("DB", "can't create table "+TABLE_MONTHLY);
+				Log.e(TAG, "can't create tables");
 				e.printStackTrace();
 			}
 
@@ -132,13 +134,31 @@ public class MeasurementDBAdapter {
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			// TODO Auto-generated method stub
-			db.execSQL("DROP TABLE IF EXISTS "+TABLE_YEARLY);
-			db.execSQL("DROP TABLE IF EXISTS "+TABLE_MONTHLY);
-			Log.i("DB_onUpgrade","drop the tables");
+			for (String tableName : tableList ) {
+				mDBHelper.dropTable(mDb, tableName);
+			}
 			onCreate(db);
+		}
+		
+		public void deleteTable(SQLiteDatabase db, String tableName) {
+			db.execSQL("DELETE FROM "+tableName);
+			Log.i(TAG,"delete data in "+tableName);
+		}
+		
+		public void dropTable(SQLiteDatabase db, String tableName) {
+			db.execSQL("DROP TABLE IF EXISTS "+tableName);
+			Log.i(TAG,"drop the "+tableName);
 		}
 	}
 
+	public void resetCacheData() {
+		// TODO Auto-generated method stub
+		
+		for (String tableName : tableList ) {
+			mDBHelper.deleteTable(mDb, tableName);
+		}
+		Log.i(TAG,"delete data in all tables");
+	}
 	public void setDailyData (String date, String type, Measurement measure) {
 
 		ContentValues qryValues = new ContentValues();
@@ -151,14 +171,14 @@ public class MeasurementDBAdapter {
 		qryValues.put("Water", measure.getWater());
 		qryValues.put("Heat", measure.getHeat());
 		
-		Log.i("Qry_insertDailyData",qryValues.toString());
+		Log.i(TAG,"insert to "+TABLE_DAILY+" query="+qryValues.toString());
 		mDb.insert(TABLE_DAILY, null, qryValues);
 	}
 	
 	public Measurement getDailyData (String date, String type) {
 		Measurement measure = new Measurement();
 		
-		String selectQry = "SELECT * FROM " + TABLE_DAILY + " WHERE userId=" + this.userId +" AND date='" + date + "' AND Type='" + type +"';";
+		String selectQry = "SELECT * FROM " + TABLE_DAILY + " WHERE userId='" + this.userId +"' AND date='" + date + "' AND Type='" + type +"';";
 		Cursor cursor = mDb.rawQuery(selectQry, null);
 		
 		if (cursor.moveToFirst()) {
@@ -186,15 +206,15 @@ public class MeasurementDBAdapter {
 			qryValues.put(monthList[i],values.get(index));
 			index++;
 		}
-		Log.i("Qry_insertYearData",qryValues.toString());
+		Log.i(TAG,"insert to "+TABLE_YEARLY+" query="+qryValues.toString());
 		mDb.insert(TABLE_YEARLY, null, qryValues);
 	}
 	
 	public List<Double> getYearlyData (int year, String kind) {
 		List<Double> resultSet = new ArrayList<Double>();
 		
-		String selectQry = "SELECT * FROM " + TABLE_YEARLY + " WHERE userId=" + this.userId +
-				" AND year=" + year + " AND Kind='" + kind + "';";
+		String selectQry = "SELECT * FROM " + TABLE_YEARLY + " WHERE userId='" + this.userId +
+				"' AND year=" + year + " AND Kind='" + kind + "';";
 		Cursor cursor = mDb.rawQuery(selectQry, null);
 		
 		if (cursor.moveToFirst()) {
@@ -212,9 +232,8 @@ public class MeasurementDBAdapter {
 
 	public int checkExistsData (String date) {
 		int count = 0;
-		String selectQry = "SELECT * FROM " + TABLE_DAILY + " WHERE userId=" + this.userId +
-				" AND date='" + date +"';";
-		Log.i("checkExistsQry",selectQry);
+		String selectQry = "SELECT * FROM " + TABLE_DAILY + " WHERE userId='" + this.userId +
+				"' AND date='" + date +"';";
 		Cursor cursor = mDb.rawQuery(selectQry, null);
 		count = cursor.getCount();
 		cursor.close();
@@ -224,9 +243,8 @@ public class MeasurementDBAdapter {
 	
 	public int checkExistsData (int year, String kind) {
 		int count = 0;
-		String selectQry = "SELECT * FROM " + TABLE_YEARLY + " WHERE userId=" + this.userId +
-				" AND year="+year+" AND kind='"+kind+"';";
-		Log.i("checkExistsQry",selectQry);
+		String selectQry = "SELECT * FROM " + TABLE_YEARLY + " WHERE userId='" + this.userId +
+				"' AND year="+year+" AND kind='"+kind+"';";
 		Cursor cursor = mDb.rawQuery(selectQry, null);
 		count = cursor.getCount();
 		cursor.close();
@@ -236,9 +254,8 @@ public class MeasurementDBAdapter {
 	
 	public int checkExistsData (int year, int month, String kind) {
 		int count = 0;
-		String selectQry = "SELECT * FROM " + TABLE_MONTHLY + " WHERE userId=" + this.userId +
-				" AND year="+year+" AND month=" + month + " AND kind='"+kind+"';";
-		Log.i("checkExistsQry",selectQry);
+		String selectQry = "SELECT * FROM " + TABLE_MONTHLY + " WHERE userId='" + this.userId +
+				"' AND year="+year+" AND month=" + month + " AND kind='"+kind+"';";
 		Cursor cursor = mDb.rawQuery(selectQry, null);
 		count = cursor.getCount();
 		cursor.close();
@@ -257,7 +274,7 @@ public class MeasurementDBAdapter {
 			qryValues.put(dayList[i],values.get(index));
 			index++;
 		}
-		Log.i("Qry_insertMonthData",qryValues.toString());
+		Log.i(TAG,"insert to "+TABLE_MONTHLY+" query="+qryValues.toString());
 		mDb.insert(TABLE_MONTHLY, null, qryValues);
 	}
 	
@@ -270,8 +287,8 @@ public class MeasurementDBAdapter {
 	    int lastDayOfMonth = cal.getActualMaximum(Calendar.DATE);
 	    
 	    // select * from monthly_data where kind='elec' ORDER BY year DESC, month DESC;
-		String selectQry = "SELECT * FROM " + TABLE_MONTHLY + " WHERE userId=" + this.userId + 
-				" AND Year=" + year + " AND Month=" + month + " AND Kind='" + kind + "';";
+		String selectQry = "SELECT * FROM " + TABLE_MONTHLY + " WHERE userId='" + this.userId + 
+				"' AND Year=" + year + " AND Month=" + month + " AND Kind='" + kind + "';";
 		Cursor cursor = mDb.rawQuery(selectQry, null);
 		
 		if (cursor.moveToFirst()) {

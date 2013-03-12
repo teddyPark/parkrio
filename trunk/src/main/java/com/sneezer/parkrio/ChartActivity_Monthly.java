@@ -112,6 +112,8 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 			mMonth = savedInstanceState.getInt("mMonth");
 			mDay = savedInstanceState.getInt("mDay");
 		} else {
+			this.userId=getIntent().getStringExtra("userId");
+			
 			if (getIntent().getStringExtra("kind") != null) {
 				kind = getIntent().getStringExtra("kind");
 			} else {
@@ -128,7 +130,7 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 			mDay = 1;
 			chartType = preferences.getString("chartType", DEFAULT_CHART);
 		}
-		
+		Log.i("userId",this.userId);
 
 		currentDateView = (TextView) findViewById(R.id.currentDateEntry);
 		currentDateView.setText(mYear + "-" + mMonth);
@@ -205,6 +207,7 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 					public void onClick(View arg0) {
 						Intent chartIntent = new Intent(ChartActivity_Monthly.this, ChartActivity_Yearly.class);
 						chartIntent.putExtra("kind", kind);
+						chartIntent.putExtra("userId",userId);
 						chartIntent.putExtra("date", Integer.toString(mYear)+"-"+Integer.toString(mMonth));
 						startActivity(chartIntent);
 					}
@@ -396,6 +399,7 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 		Log.i("onCreateOptionsMenu","called");
 		MenuItem item = menu.add(0,1,0,"로그아웃");
 		menu.add(0,2,0,"챠트 바꾸기");
+		menu.add(0,3,0,"Cache data 삭제");
 		return true;
 	}
 
@@ -403,9 +407,11 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
 		switch (item.getItemId()) {
-		case 1: logout();
+		case 1: createLogoutDialogBox().show();
 			return true;
 		case 2: changeChart();
+			return true;
+		case 3: createCacheClearDialogBox().show();
 			return true;
 		}
 		return false;
@@ -446,7 +452,7 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 			result.put("name", "난방");
 			result.put("barColor", Color.BLUE);
 		} else if (kind.equals("gas")) {
-			result.put("title", "일별 가스 사용량");
+			result.put("title", "일별 )가스 사용량");
 			result.put("unit", "㎥");
 			result.put("name", "가스");
 			result.put("barColor", Color.BLUE);

@@ -91,7 +91,7 @@ public class CompareActivity extends AbstractAsyncActivity {
 	
 	public void startChartActivity ( String kind, String date ) {
 		Intent chartIntent = new Intent(getApplicationContext(), ChartActivity_Monthly.class);
-		chartIntent.putExtra("type", kind);
+		chartIntent.putExtra("kind", kind);
 		chartIntent.putExtra("date", date);
 		chartIntent.putExtra("userId", userId);
 
