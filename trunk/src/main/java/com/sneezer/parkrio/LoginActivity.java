@@ -149,8 +149,6 @@ public class LoginActivity extends AbstractAsyncActivity {
 	}
 	
 	private class FetchSecuredResourceTask extends AsyncTask<Void, Void, String> {
-		private String username;
-		private String password;
 		private boolean isLogon = false;
 		
 		@Override
@@ -159,10 +157,10 @@ public class LoginActivity extends AbstractAsyncActivity {
 			
 			// get username / password
 			EditText editText = (EditText) findViewById(R.id.useridEntry);
-			this.username = editText.getText().toString();
+			userId = editText.getText().toString();
 			
 			editText = (EditText) findViewById(R.id.passwordEntry);
-			this.password = editText.getText().toString();
+			userPassword = editText.getText().toString();
 			
 			super.onPreExecute();
 		}
@@ -179,13 +177,13 @@ public class LoginActivity extends AbstractAsyncActivity {
 			
 			// set parameter
 			List <NameValuePair> requestParams = new ArrayList<NameValuePair>();
-			requestParams.add(new BasicNameValuePair("uid",this.username));
-			requestParams.add(new BasicNameValuePair("upwd",this.password));
+			requestParams.add(new BasicNameValuePair("uid",userId));
+			requestParams.add(new BasicNameValuePair("upwd",userPassword));
 			
 			try {
 				httpost.setEntity(new UrlEncodedFormEntity(requestParams));
-				httpclient.getParams().setParameter("http.connection.timeout", 3000);
-				httpclient.getParams().setParameter("http.socket.timeout", 2000);
+				httpclient.getParams().setParameter("http.connection.timeout", HttpClientForParkrio.CONNECT_TIMEOUT);
+				httpclient.getParams().setParameter("http.socket.timeout", HttpClientForParkrio.SOCKET_TIMEOUT);
 				response = httpclient.execute(httpost);
 			} catch (Exception e) {
 				e.printStackTrace();

@@ -130,7 +130,7 @@ public class ChartActivity_Monthly extends AbstractAsyncActivity implements OnGe
 			mDay = 1;
 			chartType = preferences.getString("chartType", DEFAULT_CHART);
 		}
-		Log.i("userId",this.userId);
+		Log.i("userId",userId);
 
 		currentDateView = (TextView) findViewById(R.id.currentDateEntry);
 		currentDateView.setText(mYear + "-" + mMonth);

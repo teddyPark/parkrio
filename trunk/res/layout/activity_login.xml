@@ -4,7 +4,8 @@
     android:id="@+id/RelativeLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:background="#000000" >
 
     <TextView
         android:id="@+id/loginTitleLabel"
@@ -81,24 +82,25 @@
             android:text="@string/autologinLabel" />
 
         <Button
-            android:id="@+id/loginBtn"
+            android:id="@+id/exitBtn"
             android:layout_width="100sp"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_below="@id/rememberChk"
-            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
             android:layout_marginTop="26dp"
-            android:text="@string/loginBtnText" />
+            android:text="@string/exitBtnText" />
 
         <Button
-            android:id="@+id/exitBtn"
+            android:id="@+id/loginBtn"
             android:layout_width="100sp"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_below="@id/rememberChk"
-            android:layout_marginRight="20dp"
+            android:layout_marginLeft="20dp"
             android:layout_marginTop="26dp"
-            android:text="@string/exitBtnText" />
+            android:text="@string/loginBtnText" />
+        
     </RelativeLayout>
 
     <TextView
@@ -111,4 +113,5 @@
         android:text=""
         android:textStyle="italic" />
 
+   
 </RelativeLayout>
