@@ -125,14 +125,14 @@ public abstract class AbstractAsyncActivity extends Activity {
 		AlertDialog logoutDialogBox = new AlertDialog.Builder(this)
 		.setTitle("안내")
 		.setMessage("로그아웃하시겠습니까?")
-		.setPositiveButton("예",new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				logout();
-			}
-		})
 		.setNeutralButton("아니요",new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 								
+			}
+		})
+		.setPositiveButton("예",new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				logout();
 			}
 		})
 		.create();
@@ -143,14 +143,14 @@ public abstract class AbstractAsyncActivity extends Activity {
 		AlertDialog cacheClearDialogBox = new AlertDialog.Builder(this)
 		.setTitle("안내")
 		.setMessage("임시데이터는 조회했던 과거자료를 저장하고 있습니다.\n임시저장 데이터를 삭제하시겠습니까?")
-		.setPositiveButton("예",new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				onClickCacheClear();
-			}
-		})
 		.setNeutralButton("아니요",new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 								
+			}
+		})
+		.setPositiveButton("예",new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				onClickCacheClear();
 			}
 		})
 		.create();

@@ -23,12 +23,13 @@ public final class R {
         public static final int type_text_size=0x7f040002;
     }
     public static final class drawable {
-        public static final int cell_shape=0x7f020000;
-        public static final int com_round_corner=0x7f020001;
-        public static final int icon=0x7f020002;
-        public static final int icon2=0x7f020003;
-        public static final int icon_backup=0x7f020004;
-        public static final int parkrio=0x7f020005;
+        public static final int app_icon=0x7f020000;
+        public static final int cell_shape=0x7f020001;
+        public static final int com_round_corner=0x7f020002;
+        public static final int icon=0x7f020003;
+        public static final int icon2=0x7f020004;
+        public static final int icon_backup=0x7f020005;
+        public static final int parkrio=0x7f020006;
     }
     public static final class id {
         public static final int AppDescription=0x7f070036;
@@ -38,7 +39,7 @@ public final class R {
         public static final int chart_area=0x7f070000;
         public static final int currentDateEntry=0x7f070003;
         public static final int elec=0x7f07000e;
-        public static final int exitBtn=0x7f070035;
+        public static final int exitBtn=0x7f070034;
         public static final int gas=0x7f070020;
         public static final int heat=0x7f070014;
         public static final int hotwater=0x7f07001a;
@@ -47,7 +48,7 @@ public final class R {
         public static final int lastmonthHeat=0x7f070018;
         public static final int lastmonthHotwater=0x7f07001e;
         public static final int lastmonthWater=0x7f07002a;
-        public static final int loginBtn=0x7f070034;
+        public static final int loginBtn=0x7f070035;
         public static final int loginTitleLabel=0x7f07002c;
         public static final int nextMonthBtn=0x7f070004;
         public static final int nextYearBtn=0x7f070005;

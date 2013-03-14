@@ -29,6 +29,9 @@ public class HttpClientForParkrio {
 	private final static String userAgentHeader = new String("Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1;; APCPMS=E839.353E.2E0A-win7^N20120502090046254556C65BBCE3E22DEE3F_1981^1^1^2186362890^30282584^2160947136; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; InfoPath.3; .NET4.0C; TCO_20130225130629)");
 	private final static String refererHeader = new String("http://211.49.175.211/hwork/iframe_DayValue.aspx");
 	
+	public final static int CONNECT_TIMEOUT = 5000;
+	public final static int SOCKET_TIMEOUT = 5000;
+	
 	public final static String TODAY_PARAM_VIEWSTATE = "/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=";
 	public final static String TODAY_URI = "/hwork/iframe_DayValue.aspx";
 	public final static String MONTHLY_PARAM_VIEWSTATE = "/wEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4=";
@@ -63,8 +66,8 @@ public class HttpClientForParkrio {
 		// set http client
 		try {
 			httpClient = (HttpURLConnection) url.openConnection();
-			httpClient.setConnectTimeout(3000);
-			httpClient.setReadTimeout(2000);
+			httpClient.setConnectTimeout(CONNECT_TIMEOUT);
+			httpClient.setReadTimeout(SOCKET_TIMEOUT);
 			httpClient.setRequestMethod("POST");
 			httpClient.setRequestProperty("Referer",refererHeader);
 			httpClient.setRequestProperty("User-Agent", userAgentHeader);
