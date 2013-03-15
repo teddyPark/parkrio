@@ -233,7 +233,6 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 
 	private DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
 
-		@Override
 		public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
 			if (year != mYear || monthOfYear + 1 != mMonth || dayOfMonth != mDay) {
