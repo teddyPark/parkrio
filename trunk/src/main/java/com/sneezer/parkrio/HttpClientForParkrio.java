@@ -32,11 +32,11 @@ public class HttpClientForParkrio {
 	public final static int CONNECT_TIMEOUT = 5000;
 	public final static int SOCKET_TIMEOUT = 5000;
 	
-	public final static String TODAY_PARAM_VIEWSTATE = "/wEPDwUKMTExNDI5NDgyMmRkxn5PRekHb9BgiR+zMd0FnM0Fa5I=";
+	public final static String TODAY_PARAM_VIEWSTATE = "/wEPDwUKMTExNDI5NDgyMmRkk+3XdPG8m5xTR1xvf1XEycvTNIY=";
 	public final static String TODAY_URI = "/hwork/iframe_DayValue.aspx";
-	public final static String MONTHLY_PARAM_VIEWSTATE = "/wEPDwUKMTU5NDg5OTA1MGRkQtZJsU4tV32pG1Vj7vs7uizyBb4=";
+	public final static String MONTHLY_PARAM_VIEWSTATE = "/wEPDwUKMTU5NDg5OTA1MGRksQzOFuq8zHCxUCzs8JeeUjMhkZQ=";
 	public final static String MONTHLY_URI = "/hwork/iframe_MonthGraph.aspx";
-	public final static String YEARLY_PARAM_VIEWSTATE = "/wEPDwUKMjAyNzU3OTkxM2RkMXAfR6Im5D2lQRtlQ01g4/icE7k=";
+	public final static String YEARLY_PARAM_VIEWSTATE = "/wEPDwUKMjAyNzU3OTkxM2RkMsWjI/ErYLGtgTlK2bgG6upnzHs=";
 	public final static String YEARLY_URI = "/hwork/iframe_YearGraph.aspx";
 	
 	private String html;
