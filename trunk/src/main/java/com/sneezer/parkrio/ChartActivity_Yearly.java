@@ -312,9 +312,13 @@ public class ChartActivity_Yearly extends AbstractAsyncActivity implements OnGes
 							// 서버에서 가져온다.
 							client = new HttpClientForParkrio("yearly");
 							URL url = new URL(getString(R.string.base_url) + client.uri);
-							postParams = "__VIEWSTATE="	+ client.paramViewState
+/*							postParams = "__VIEWSTATE="	+ client.paramViewState
 									+ "&selYear=" + (mYear-i) + "&selMonth=" + mMonth
 									+ "&sKind=" + kind.toUpperCase();
+*/
+							postParams = "selYear=" + (mYear-i) + "&selMonth=" + mMonth
+									+ "&sKind=" + kind.toUpperCase();
+
 							Log.i("url", postParams);
 							
 							htmlBody = client.fetch(url, cookieString, postParams);
