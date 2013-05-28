@@ -182,7 +182,8 @@ public class CompareActivity extends AbstractAsyncActivity {
 					} else {
 						HttpClientForParkrio client = new HttpClientForParkrio("daily");
 						URL url = new URL(serverHostName+client.uri);
-						postParams = "__VIEWSTATE="	+ client.paramViewState	+ "&txtFDate=" + dateList.get(i);
+						//postParams = "__VIEWSTATE="	+ client.paramViewState	+ "&txtFDate=" + dateList.get(i);
+						postParams = "txtFDate=" + dateList.get(i);
 						Log.i("postParams", postParams);
 						
 						String htmlBody = client.fetch(url, cookieString, postParams);
